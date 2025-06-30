@@ -26,7 +26,9 @@ class FaissIndex:
                 continue
             if score < score_threshold:
                 continue
-            celeb = self.meta[str(idx)]
+            celeb = self.meta.get(str(idx))
+            if celeb is None:
+                continue
             matches.append({
                 "name": celeb["name"],
                 "score": float(score),

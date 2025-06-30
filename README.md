@@ -32,6 +32,29 @@ The images themselves should be available under a `static/` directory so the
 web UI can display them. If your dataset lives elsewhere you can symlink or copy
 it into `static` before starting the service.
 
+### Downloading the CelebA dataset
+
+If you don't already have a celebrity image dataset you can download the
+[CelebA dataset](https://github.com/mireshghallah/CelebA) using the helper
+script in this repository:
+
+```bash
+pip install -r requirements.txt
+python -m backend.scripts.download_celeba
+python -m backend.scripts.build_vectors data/celeba
+```
+
+The script downloads the images and identity labels and extracts them into
+`data/celeba/`. The vector builder then generates the FAISS index and metadata
+files which the API will pick up on the next start.
+
+### Using your own dataset
+
+If you would like to use a custom dataset, place your images under separate
+folders (one folder per person) and run `backend.scripts.build_vectors` pointing
+to that directory as shown above. Ensure the images are accessible under the
+`static/` directory so the frontend can display them.
+
 Run tests:
 
 ```bash
