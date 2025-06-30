@@ -4,5 +4,6 @@ uvicorn[standard]
 faiss-cpu
 numpy
 pillow
+opencv-python
 pytest
 pytest-asyncio
