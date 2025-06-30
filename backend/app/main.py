@@ -5,7 +5,7 @@ from pathlib import Path
 from .models import MatchRequest, MatchResponse, Match
 from .face import get_pipeline
 from .faiss_index import get_index
-from datetime import datetime
+from datetime import datetime, timezone
 import base64
 import numpy as np
 import cv2
@@ -49,11 +49,17 @@ def match(req: MatchRequest) -> MatchResponse:
 
     face = pipeline.detect_and_align(image)
     embedding = pipeline.embed(face).astype('float32')
+    # the FAISS index is built on normalized vectors so we normalize
+    # the query as well before searching
+    norm = np.linalg.norm(embedding)
+    if norm > 0:
+        embedding /= norm
     matches = index.search(embedding, top_k=3)
     match_objs = [Match(**m) for m in matches]
     return MatchResponse(
         query_id=str(uuid.uuid4()),
-        timestamp=datetime.utcnow().isoformat(),
+        # use timezone-aware UTC timestamp to avoid deprecation warnings
+        timestamp=datetime.now(timezone.utc).isoformat(),
         matches=match_objs
     )
 
