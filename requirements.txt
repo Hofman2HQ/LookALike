@@ -1,0 +1,8 @@
+httpx
+fastapi
+uvicorn[standard]
+faiss-cpu
+numpy
+pillow
+pytest
+pytest-asyncio
