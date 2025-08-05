@@ -54,7 +54,10 @@ def match(req: MatchRequest) -> MatchResponse:
     norm = np.linalg.norm(embedding)
     if norm > 0:
         embedding /= norm
-    matches = index.search(embedding, top_k=3)
+    # Retrieve all close matches above our confidence threshold.  We request a
+    # larger ``top_k`` so the frontend can display multiple options in a
+    # carousel.
+    matches = index.search(embedding, top_k=10, score_threshold=0.88)
     match_objs = [Match(**m) for m in matches]
     return MatchResponse(
         query_id=str(uuid.uuid4()),

@@ -3,6 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <title>LookAlike Demo</title>
+    <style>
+        #results { margin-top: 20px; }
+        .carousel { display: flex; align-items: center; }
+        .carousel-inner {
+            display: flex;
+            overflow: hidden;
+            width: 150px;
+            transition: transform 0.3s ease;
+        }
+        .carousel-item { flex: 0 0 150px; text-align: center; }
+        .carousel-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <h1>LookAlike Demo</h1>

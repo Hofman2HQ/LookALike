@@ -18,12 +18,56 @@ upload.addEventListener('change', () => {
         }
         const data = await resp.json();
         results.innerHTML = '';
-        data.matches.forEach(m => {
-            const div = document.createElement('div');
-            div.innerHTML = `<h3>${m.name} (${(m.score * 100).toFixed(1)}%)</h3>` +
+
+        const matches = data.matches.filter(m => m.score >= 0.88);
+        if (matches.length === 0) {
+            results.textContent = 'No close matches found.';
+            return;
+        }
+
+        const carousel = document.createElement('div');
+        carousel.className = 'carousel';
+
+        const prev = document.createElement('button');
+        prev.className = 'carousel-btn';
+        prev.textContent = '<';
+
+        const next = document.createElement('button');
+        next.className = 'carousel-btn';
+        next.textContent = '>';
+
+        const inner = document.createElement('div');
+        inner.className = 'carousel-inner';
+        inner.style.width = `${matches.length * 150}px`;
+
+        matches.forEach(m => {
+            const item = document.createElement('div');
+            item.className = 'carousel-item';
+            item.style.width = '150px';
+            item.innerHTML = `<h3>${m.name} (${(m.score * 100).toFixed(1)}%)</h3>` +
                 `<img src="${m.photo_url}" width="112" />`;
-            results.appendChild(div);
+            inner.appendChild(item);
         });
+
+        let index = 0;
+        const update = () => {
+            inner.style.transform = `translateX(-${index * 150}px)`;
+        };
+
+        prev.addEventListener('click', () => {
+            index = (index - 1 + matches.length) % matches.length;
+            update();
+        });
+        next.addEventListener('click', () => {
+            index = (index + 1) % matches.length;
+            update();
+        });
+
+        carousel.appendChild(prev);
+        carousel.appendChild(inner);
+        carousel.appendChild(next);
+        results.appendChild(carousel);
+        update();
     };
     reader.readAsDataURL(file);
 });
