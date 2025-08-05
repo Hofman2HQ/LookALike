@@ -5,13 +5,16 @@ import faiss
 import numpy as np
 import json
 
+from .face import get_pipeline
+
 class FaissIndex:
     def __init__(self, index_path: str, meta_path: str):
         if os.path.exists(index_path):
             self.index = faiss.read_index(index_path)
         else:
             # create an empty index for development/testing
-            self.index = faiss.IndexFlatIP(512)
+            dim = get_pipeline().embedding_size
+            self.index = faiss.IndexFlatIP(dim)
         if os.path.exists(meta_path):
             with open(meta_path, 'r') as f:
                 self.meta = json.load(f)
