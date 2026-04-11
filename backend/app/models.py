@@ -1,4 +1,4 @@
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel
 from typing import List
 
 class MatchRequest(BaseModel):
@@ -7,10 +7,11 @@ class MatchRequest(BaseModel):
 class Match(BaseModel):
     name: str
     score: float
-    photo_url: HttpUrl
+    photo_url: str
 
 class MatchResponse(BaseModel):
     query_id: str
     timestamp: str
     matches: List[Match]
+    best_guess: bool = False  # True when no match cleared the threshold
 

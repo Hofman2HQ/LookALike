@@ -6,11 +6,3 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app/backend
-  postgres:
-    image: postgres:16
-    environment:
-      POSTGRES_USER: lookalike
-      POSTGRES_PASSWORD: lookalike
-      POSTGRES_DB: lookalike
-    ports:
-      - "5432:5432"

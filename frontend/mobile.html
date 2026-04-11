@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LookAlike – Take a Selfie</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: sans-serif;
+            padding: 24px 16px;
+            max-width: 480px;
+            margin: 0 auto;
+            background: #fafafa;
+        }
+        h2 { text-align: center; margin-bottom: 6px; }
+        p  { text-align: center; color: #555; }
+
+        #capture-btn {
+            display: block;
+            width: 100%;
+            margin: 20px 0;
+            padding: 16px;
+            font-size: 1.1rem;
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        #capture-btn:disabled { background: #93c5fd; cursor: default; }
+        #capture-btn:hover:not(:disabled) { background: #1d4ed8; }
+
+        #preview {
+            display: none;
+            width: 100%;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        #status {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 1rem;
+            min-height: 1.4em;
+        }
+        #status.success { color: #16a34a; font-weight: 600; }
+        #status.error   { color: #dc2626; }
+    </style>
+</head>
+<body>
+    <h2>LookAlike</h2>
+    <p>Take a selfie to find your celebrity lookalike.<br>Results will appear on the desktop.</p>
+
+    <input type="file" id="file-input" accept="image/*" capture="user" style="display:none">
+    <button id="capture-btn">📷 Take Selfie</button>
+
+    <img id="preview" alt="Your selfie preview">
+    <div id="status"></div>
+
+    <script>
+        // Extract the session ID from the URL path: /mobile/{session_id}
+        const sessionId = window.location.pathname.split('/').pop();
+
+        const captureBtn  = document.getElementById('capture-btn');
+        const fileInput   = document.getElementById('file-input');
+        const preview     = document.getElementById('preview');
+        const statusEl    = document.getElementById('status');
+
+        captureBtn.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            // Show preview immediately
+            const reader = new FileReader();
+            reader.onload = async () => {
+                preview.src = reader.result;
+                preview.style.display = 'block';
+
+                statusEl.className = '';
+                statusEl.textContent = 'Uploading…';
+                captureBtn.disabled = true;
+
+                const b64 = reader.result.split(',')[1];
+                try {
+                    const resp = await fetch(`/mobile/${sessionId}/upload`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({image_base64: b64}),
+                    });
+                    if (resp.status === 422) {
+                        throw new Error('No face detected. Please take a clearer selfie.');
+                    }
+                    if (!resp.ok) {
+                        throw new Error(`Server error ${resp.status}`);
+                    }
+                    statusEl.className = 'success';
+                    statusEl.textContent = '✓ Photo sent! Check the desktop for your results.';
+                } catch (e) {
+                    statusEl.className = 'error';
+                    statusEl.textContent = 'Upload failed: ' + e.message;
+                    captureBtn.disabled = false;
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+    </script>
+</body>
+</html>

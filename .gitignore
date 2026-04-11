@@ -1,0 +1,37 @@
+# ── Dataset & generated index ─────────────────────────────────────────────
+# Downloaded by:  python -m backend.scripts.download_celeba
+# Index built by: python -m backend.scripts.build_vectors data/lfw
+data/
+
+# ── Static served images ──────────────────────────────────────────────────
+# Populated by build_vectors.py (best-representative image per person)
+static/
+
+# ── Model weights ─────────────────────────────────────────────────────────
+# Auto-downloaded at runtime by backend/app/face.py (no manual step needed)
+backend/models/
+
+# ── Python ────────────────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# ── Virtual environments ──────────────────────────────────────────────────
+venv/
+env/
+.venv/
+.env
+
+# ── HuggingFace cache ─────────────────────────────────────────────────────
+.cache/
+
+# ── Claude Code ───────────────────────────────────────────────────────────
+.claude/
+
+# ── OS / editor ───────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo

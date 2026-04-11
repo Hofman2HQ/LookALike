@@ -1,11 +1,17 @@
 from functools import lru_cache
 import os
+from pathlib import Path
 from typing import List
 import faiss
 import numpy as np
 import json
 
 from .face import get_pipeline
+
+# Project root is two levels above this file (backend/app/faiss_index.py)
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]
+_DEFAULT_INDEX = str(_PROJECT_ROOT / "data" / "celebs.faiss")
+_DEFAULT_META  = str(_PROJECT_ROOT / "data" / "celebs_meta.json")
 
 class FaissIndex:
     def __init__(self, index_path: str, meta_path: str):
@@ -40,6 +46,6 @@ class FaissIndex:
         return matches
 
 @lru_cache()
-def get_index(index_path: str = "data/celebs.faiss", meta_path: str = "data/celebs_meta.json") -> FaissIndex:
+def get_index(index_path: str = _DEFAULT_INDEX, meta_path: str = _DEFAULT_META) -> FaissIndex:
     return FaissIndex(index_path, meta_path)
 

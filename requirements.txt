@@ -6,5 +6,8 @@ numpy
 pillow
 opencv-python-headless
 requests
+tqdm
+datasets
+onnxruntime
 pytest
 pytest-asyncio
