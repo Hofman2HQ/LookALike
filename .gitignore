@@ -1,14 +1,10 @@
-# ── Dataset & generated index ─────────────────────────────────────────────
-# Downloaded by:  python -m backend.scripts.download_celeba
-# Index built by: python -m backend.scripts.build_vectors data/lfw
-data/
-
-# ── Static served images ──────────────────────────────────────────────────
-# Populated by build_vectors.py (best-representative image per person)
-static/
+# ── Raw training datasets (excluded; pre-built index & thumbnails are tracked) ─
+data/lfw/
+data/celebs/
+data/raw/
 
 # ── Model weights ─────────────────────────────────────────────────────────
-# Auto-downloaded at runtime by backend/app/face.py (no manual step needed)
+# Auto-downloaded at build/runtime by backend/app/face.py
 backend/models/
 
 # ── Python ────────────────────────────────────────────────────────────────
@@ -17,6 +13,7 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
+.pytest_cache/
 
 # ── Virtual environments ──────────────────────────────────────────────────
 venv/

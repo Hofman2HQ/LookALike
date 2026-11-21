@@ -3,94 +3,136 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LookAlike – Find Your Celebrity Twin</title>
+  <title>LookAlike – Party Celebrity Twin Finder</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:           #0c0c12;
-      --surface:      #16161f;
-      --surface-2:    #1e1e2a;
-      --border:       rgba(255,255,255,0.08);
+      --bg:           #0a0a10;
+      --surface:      #14141f;
+      --surface-2:    #1d1d2b;
+      --surface-3:    #252538;
+      --border:       rgba(255,255,255,0.09);
       --accent:       #7c6aff;
       --accent-light: #c084fc;
-      --text:         #eeeef5;
-      --muted:        #7878a0;
+      --pink:         #f472b6;
+      --cyan:         #22d3ee;
+      --text:         #f0f0f8;
+      --muted:        #8585ad;
       --success:      #34d399;
       --warn:         #fbbf24;
       --error:        #f87171;
     }
 
-    html, body { height: 100%; }
+    html, body { min-height: 100%; }
     body {
-      background: var(--bg);
+      background:
+        radial-gradient(circle at 18% 12%, rgba(124,106,255,0.14), transparent 38%),
+        radial-gradient(circle at 82% 18%, rgba(244,114,182,0.11), transparent 36%),
+        var(--bg);
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    /* ── Confetti Canvas ─────────────────────────────── */
+    #confetti-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 999;
     }
 
     /* ── Header ───────────────────────────────────────── */
     header {
-      padding: 1.25rem 2rem;
+      padding: 1.15rem 2rem;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(10px);
+      background: rgba(10,10,16,0.7);
+      position: sticky;
+      top: 0;
+      z-index: 50;
     }
     .logo {
-      font-size: 1.3rem;
+      font-size: 1.35rem;
       font-weight: 800;
       letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
-    .logo span { color: var(--accent); }
+    .logo span {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--pink) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .db-pill {
+      font-size: 0.74rem;
+      color: var(--muted);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+    .db-pill b { color: var(--cyan); }
 
     /* ── Hero ─────────────────────────────────────────── */
     .hero {
       text-align: center;
-      padding: 5rem 1.5rem 3.5rem;
-      max-width: 640px;
+      padding: 2.8rem 1.5rem 2rem;
+      max-width: 680px;
       margin: 0 auto;
     }
     .hero-badge {
       display: inline-block;
       background: rgba(124,106,255,0.15);
       color: var(--accent-light);
-      border: 1px solid rgba(124,106,255,0.3);
+      border: 1px solid rgba(124,106,255,0.35);
       border-radius: 999px;
       font-size: 0.75rem;
-      font-weight: 600;
+      font-weight: 700;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      padding: 0.3rem 0.85rem;
-      margin-bottom: 1.5rem;
+      padding: 0.3rem 0.9rem;
+      margin-bottom: 1rem;
     }
     .hero h1 {
-      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-size: clamp(2rem, 5vw, 3.1rem);
       font-weight: 800;
       line-height: 1.1;
       letter-spacing: -1.5px;
-      margin-bottom: 1.1rem;
+      margin-bottom: 0.85rem;
     }
     .hero h1 em {
       font-style: normal;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 55%, var(--pink) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
     .hero p {
       color: var(--muted);
-      font-size: 1.05rem;
-      max-width: 440px;
-      margin: 0 auto 2.5rem;
+      font-size: 1rem;
+      max-width: 480px;
+      margin: 0 auto 1.75rem;
     }
 
     /* ── Upload zone ──────────────────────────────────── */
     .upload-zone {
       display: flex;
-      flex-direction: column;
+      flex-wrap: wrap;
+      justify-content: center;
       align-items: center;
-      gap: 0.85rem;
-      max-width: 340px;
+      gap: 0.75rem;
+      max-width: 520px;
       margin: 0 auto;
     }
     #upload { display: none; }
@@ -100,45 +142,160 @@
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      width: 100%;
-      padding: 0.85rem 1.5rem;
-      border-radius: 12px;
+      padding: 0.85rem 1.45rem;
+      border-radius: 14px;
       border: none;
       font-size: 0.95rem;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      transition: opacity 0.15s, transform 0.1s;
+      transition: all 0.16s ease;
       text-align: center;
     }
-    .btn:hover  { opacity: 0.85; transform: translateY(-1px); }
-    .btn:active { transform: translateY(0); opacity: 1; }
-    .btn-primary  { background: var(--accent); color: #fff; }
+    .btn:hover  { transform: translateY(-2px); filter: brightness(1.08); }
+    .btn:active { transform: translateY(0); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #9333ea);
+      color: #fff;
+      box-shadow: 0 8px 24px rgba(124,106,255,0.32);
+    }
     .btn-secondary {
       background: var(--surface-2);
       color: var(--text);
       border: 1px solid var(--border);
     }
 
-    .divider {
+    /* ── Mode Selector & Custom Feature Sliders ────────── */
+    .mode-selector-wrap {
+      max-width: 620px;
+      margin: 0 auto 1.4rem;
+    }
+    .mode-selector-label {
+      font-size: 0.73rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
       color: var(--muted);
-      font-size: 0.8rem;
-      display: flex;
+      font-weight: 700;
+      margin-bottom: 0.55rem;
+    }
+    .mode-pills {
+      display: inline-flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.45rem;
+      background: var(--surface);
+      padding: 0.35rem;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+    }
+    .mode-pill {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--muted);
+      padding: 0.5rem 0.95rem;
+      border-radius: 12px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+    .mode-pill:hover { color: var(--text); }
+    .mode-pill.active {
+      background: linear-gradient(135deg, rgba(124,106,255,0.28), rgba(244,114,182,0.22));
+      border-color: rgba(192,132,252,0.5);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(124,106,255,0.22);
+    }
+    .mode-desc {
+      font-size: 0.78rem;
+      color: var(--cyan);
+      margin-top: 0.5rem;
+      font-weight: 600;
+    }
+
+    .custom-weights-box {
+      display: none;
+      margin: 0.85rem auto 0;
+      max-width: 520px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1rem 1.2rem;
+      text-align: left;
+    }
+    .custom-weights-box.open { display: block; }
+    .slider-row {
+      display: grid;
+      grid-template-columns: 155px 1fr 44px;
       align-items: center;
       gap: 0.75rem;
+      margin-bottom: 0.55rem;
+      font-size: 0.78rem;
+    }
+    .slider-row:last-of-type { margin-bottom: 0; }
+    .slider-row label { font-weight: 600; color: var(--text); }
+    .slider-row input[type="range"] {
       width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
     }
-    .divider::before, .divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
+    .slider-val {
+      text-align: right;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      color: var(--cyan);
+      font-weight: 700;
     }
+    .apply-weights-btn {
+      margin-top: 0.75rem;
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 10px;
+      border: 1px solid rgba(124,106,255,0.4);
+      background: rgba(124,106,255,0.18);
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .apply-weights-btn:hover { background: rgba(124,106,255,0.3); }
+
+    /* Trait tags & sub-score pills on cards */
+    .trait-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-top: 0.55rem;
+    }
+    .trait-chip {
+      font-size: 0.68rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 0.16rem 0.5rem;
+      border-radius: 999px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .subscore-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.35rem 0.55rem;
+      margin-top: 0.65rem;
+      padding-top: 0.6rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.71rem;
+    }
+    .subscore-item {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+    }
+    .subscore-item b { color: var(--text); }
 
     /* ── Results area ─────────────────────────────────── */
     #results {
-      max-width: 640px;
-      margin: 2.5rem auto 5rem;
-      padding: 0 1.5rem;
+      max-width: 880px;
+      margin: 1.5rem auto 5rem;
+      padding: 0 1.25rem;
       min-height: 2rem;
     }
 
@@ -150,78 +307,388 @@
     }
     .status-msg.error { color: var(--error); }
 
-    /* Spinner */
-    .spinner {
-      width: 28px; height: 28px;
-      border: 3px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      margin: 0 auto 0.75rem;
+    /* ── Stage 1: Party Live Biometric Scan & Roulette ── */
+    .scan-stage {
+      background: var(--surface);
+      border: 1px solid rgba(124,106,255,0.28);
+      border-radius: 24px;
+      padding: 1.75rem 1.5rem 1.5rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55), 0 0 40px rgba(124,106,255,0.12);
+      animation: fadeIn 0.25s ease;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
 
-    /* ── Carousel ─────────────────────────────────────── */
-    .results-header {
+    .scan-header {
+      text-align: center;
+      margin-bottom: 1.35rem;
+    }
+    .scan-phase-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.76rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--cyan);
+      background: rgba(34,211,238,0.1);
+      border: 1px solid rgba(34,211,238,0.28);
+      padding: 0.28rem 0.85rem;
+      border-radius: 999px;
+      margin-bottom: 0.55rem;
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+      animation: pulse 0.9s infinite alternate;
+    }
+    @keyframes pulse {
+      from { opacity: 0.4; transform: scale(0.85); }
+      to   { opacity: 1; transform: scale(1.2); }
+    }
+    .scan-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+    }
+
+    .scan-arena {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .face-box-card {
+      width: 240px;
+      background: var(--surface-2);
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      position: relative;
+    }
+    .face-box-media {
+      position: relative;
+      width: 240px;
+      height: 240px;
+      overflow: hidden;
+      background: #08080d;
+    }
+    .face-box-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Laser scan beam sweeping across user photo */
+    .laser-beam {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--cyan), #fff, var(--cyan), transparent);
+      box-shadow: 0 0 14px 3px rgba(34,211,238,0.75);
+      animation: laserSweep 1.35s ease-in-out infinite alternate;
+      z-index: 4;
+    }
+    @keyframes laserSweep {
+      0%   { top: 6%; }
+      100% { top: 92%; }
+    }
+
+    .scan-grid-overlay {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(34,211,238,0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34,211,238,0.07) 1px, transparent 1px);
+      background-size: 20px 20px;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Biometric SVG landmark overlay */
+    .landmark-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .face-box-footer {
+      padding: 0.75rem 0.9rem;
+      text-align: center;
+    }
+    .face-box-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .face-box-name {
+      font-size: 0.96rem;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+
+    /* Center VS telemetry column */
+    .vs-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      min-width: 120px;
+    }
+    .vs-circle {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--pink));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 1rem;
+      letter-spacing: 0.04em;
+      box-shadow: 0 0 24px rgba(124,106,255,0.5);
+    }
+    .live-counter {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--cyan);
+      text-align: center;
+    }
+    .live-rate {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .scan-progress-wrap {
+      max-width: 540px;
+      margin: 1.35rem auto 0;
+    }
+    .scan-progress-bar {
+      height: 7px;
+      background: var(--surface-3);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .scan-progress-fill {
+      height: 100%;
+      width: 5%;
+      background: linear-gradient(90deg, var(--cyan), var(--accent), var(--pink));
+      border-radius: 999px;
+      transition: width 0.12s linear;
+    }
+    .scan-actions {
+      display: flex;
+      justify-content: center;
+      margin-top: 0.9rem;
+    }
+    .skip-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+    .skip-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.25); }
+
+    /* ── Stage 2: Party Verdict & Side-by-Side Comparison ── */
+    .party-verdict {
       text-align: center;
       margin-bottom: 1.5rem;
+      animation: fadeIn 0.35s ease;
     }
-    .results-header p {
+    .verdict-pill {
+      display: inline-block;
+      background: linear-gradient(135deg, rgba(124,106,255,0.2), rgba(244,114,182,0.2));
+      border: 1px solid rgba(192,132,252,0.4);
+      color: #fff;
+      font-size: 0.88rem;
+      font-weight: 700;
+      padding: 0.42rem 1.1rem;
+      border-radius: 999px;
+      margin-bottom: 0.5rem;
+      box-shadow: 0 4px 20px rgba(124,106,255,0.2);
+    }
+    .verdict-sub {
       font-size: 0.78rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: var(--muted);
-      font-weight: 600;
+      font-weight: 700;
     }
 
-    .carousel { display: flex; align-items: center; justify-content: center; gap: 1rem; }
+    .comparison-stage {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
 
+    /* User selfie card in final comparison */
+    .user-selfie-card {
+      width: 230px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.4);
+      position: relative;
+    }
+    .user-selfie-media {
+      width: 230px;
+      height: 260px;
+      position: relative;
+      background: #08080d;
+    }
+    .user-selfie-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .you-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(12, 12, 18, 0.84);
+      backdrop-filter: blur(6px);
+      color: var(--cyan);
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      border: 1px solid rgba(34,211,238,0.35);
+      z-index: 6;
+    }
+    .landmark-toggle-btn {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(12, 12, 18, 0.82);
+      backdrop-filter: blur(6px);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.22rem 0.6rem;
+      cursor: pointer;
+      z-index: 6;
+    }
+    .landmark-toggle-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+    .user-selfie-info {
+      padding: 1rem 1.1rem 1.15rem;
+    }
+    .user-selfie-title {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    .user-selfie-sub {
+      font-size: 0.78rem;
+      color: var(--success);
+      font-weight: 600;
+      margin-top: 3px;
+    }
+
+    /* ── Carousel ─────────────────────────────────────── */
+    .carousel {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.85rem;
+    }
     .carousel-viewport {
       overflow: hidden;
-      width: 220px;
-      border-radius: 18px;
+      width: 260px;
+      border-radius: 20px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
     }
     .carousel-track {
       display: flex;
       transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
     }
     .carousel-item {
-      flex: 0 0 220px;
+      flex: 0 0 260px;
+      width: 260px;
       background: var(--surface);
-      border-radius: 18px;
+      border-radius: 20px;
       overflow: hidden;
       border: 1px solid var(--border);
+      position: relative;
+    }
+    .rank-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(12, 12, 18, 0.82);
+      backdrop-filter: blur(6px);
+      color: #fff;
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      z-index: 2;
+    }
+    .rank-badge.top-rank {
+      background: linear-gradient(135deg, var(--accent), var(--pink));
+      border-color: transparent;
     }
     .carousel-item img {
-      width: 220px;
-      height: 220px;
+      width: 260px;
+      height: 260px;
       object-fit: cover;
       display: block;
+      background: var(--surface-2);
     }
-    .carousel-item-info { padding: 0.9rem 1rem 1rem; }
+    .carousel-item-info { padding: 1rem 1.15rem 1.15rem; }
     .celeb-name {
       font-weight: 700;
-      font-size: 0.95rem;
+      font-size: 1.05rem;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .match-pct {
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin-top: 2px;
+      font-size: 0.84rem;
+      color: var(--accent-light);
+      font-weight: 700;
+      margin-top: 3px;
     }
     .match-bar {
-      height: 4px;
+      height: 5px;
       background: var(--border);
-      border-radius: 2px;
-      margin-top: 8px;
+      border-radius: 3px;
+      margin-top: 9px;
       overflow: hidden;
     }
     .match-bar-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--accent-light));
-      border-radius: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--pink));
+      border-radius: 3px;
       width: 0%;
       transition: width 0.5s ease 0.15s;
     }
@@ -230,21 +697,198 @@
       background: var(--surface-2);
       border: 1px solid var(--border);
       color: var(--text);
-      width: 40px; height: 40px;
+      width: 42px; height: 42px;
       border-radius: 50%;
-      font-size: 1rem;
+      font-size: 1.35rem;
       cursor: pointer;
       flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
-      transition: background 0.15s;
+      transition: background 0.15s, transform 0.1s;
+      user-select: none;
     }
-    .carousel-btn:hover { background: rgba(124,106,255,0.2); }
+    .carousel-btn:hover { background: rgba(124,106,255,0.25); transform: scale(1.06); }
+    .carousel-btn:active { transform: scale(0.96); }
 
     .carousel-counter {
       text-align: center;
-      font-size: 0.78rem;
+      font-size: 0.82rem;
       color: var(--muted);
-      margin-top: 0.85rem;
+      margin-top: 0.9rem;
+      font-weight: 600;
+    }
+
+    /* ── Thumbnail Strip for Multi-Celebrity Carousel ─── */
+    .carousel-thumbs {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      margin-top: 1rem;
+    }
+    .thumb-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.25rem 0.7rem 0.25rem 0.25rem;
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+    .thumb-btn img {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+    }
+    .thumb-btn:hover {
+      border-color: rgba(124,106,255,0.45);
+      color: var(--text);
+    }
+    .thumb-btn.active {
+      background: rgba(124,106,255,0.2);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* ── Stage 3: Comparison Details Drawer ───────────── */
+    .details-toggle-wrap {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-top: 1.4rem;
+    }
+    .details-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--surface-2);
+      border: 1px solid rgba(124,106,255,0.35);
+      color: var(--text);
+      padding: 0.6rem 1.15rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+    .details-toggle-btn:hover {
+      background: rgba(124,106,255,0.18);
+      border-color: var(--accent);
+    }
+
+    .details-panel {
+      display: none;
+      margin-top: 1.25rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.4rem;
+      animation: fadeIn 0.22s ease;
+    }
+    .details-panel.open { display: block; }
+
+    .details-section-title {
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.35rem;
+    }
+    .kpi-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0.85rem 1rem;
+    }
+    .kpi-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+    .kpi-value {
+      font-size: 1.28rem;
+      font-weight: 800;
+      color: var(--cyan);
+      margin-top: 2px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+    }
+    .kpi-sub {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* Timing breakdown bar */
+    .timing-bar-stack {
+      display: flex;
+      height: 10px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: var(--surface-3);
+      margin-bottom: 0.65rem;
+      gap: 2px;
+    }
+    .timing-seg { height: 100%; }
+    .timing-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.9rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 1.35rem;
+    }
+    .timing-legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .legend-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    /* Active match technical metrics table */
+    .match-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 0.6rem;
+    }
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 0.6rem 0.9rem;
+      border-radius: 10px;
+      font-size: 0.8rem;
+    }
+    .metric-row span:first-child { color: var(--muted); }
+    .metric-row span:last-child {
+      font-weight: 700;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      color: var(--text);
     }
 
     /* ── QR panel ─────────────────────────────────────── */
@@ -254,12 +898,12 @@
       border-radius: 18px;
       padding: 2rem 1.5rem;
       text-align: center;
-      max-width: 300px;
+      max-width: 320px;
       margin: 0 auto;
     }
-    .qr-panel h3 { font-size: 1rem; margin-bottom: 0.4rem; }
+    .qr-panel h3 { font-size: 1.05rem; margin-bottom: 0.4rem; }
     .qr-panel .sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 1rem; }
-    .qr-panel canvas, .qr-panel img { border-radius: 8px; }
+    .qr-panel canvas, .qr-panel img { border-radius: 8px; margin: 0 auto; }
     .qr-url {
       font-size: 0.68rem;
       color: var(--muted);
@@ -291,23 +935,60 @@
 </head>
 <body>
 
+  <canvas id="confetti-canvas"></canvas>
+
   <header>
-    <div class="logo">Look<span>Alike</span></div>
+    <div class="logo">&#x2728; Look<span>Alike</span></div>
+    <div class="db-pill" id="db-pill">Database: <b id="db-count">985</b> Celebrities</div>
   </header>
 
   <section class="hero">
-    <div class="hero-badge">&#x2728; AI-powered</div>
-    <h1>Find your<br><em>celebrity twin</em></h1>
-    <p>Upload a selfie and our AI matches your face against thousands of celebrities to find who you most resemble.</p>
+    <div class="hero-badge">&#x1F389; Party Edition &bull; Full-Head &amp; Biometric AI</div>
+    <h1>Who is your<br><em>celebrity twin?</em></h1>
+    <p>Choose your comparison mode, snap or upload a selfie, and watch our AI scan your face, hair style, hair color, and head features against 985 celebrities.</p>
+
+    <div class="mode-selector-wrap">
+      <div class="mode-selector-label">Comparison Mode</div>
+      <div class="mode-pills" id="mode-pills">
+        <button type="button" class="mode-pill active" data-mode="full_head">&#x1F487; Full Head &amp; Hair</button>
+        <button type="button" class="mode-pill" data-mode="face">&#x1F3AD; Face Only</button>
+        <button type="button" class="mode-pill" data-mode="hair_twin">&#x1F488; Hair &amp; Style Twin</button>
+        <button type="button" class="mode-pill" data-mode="custom">&#x1F39B;&#xFE0F; Custom Mix</button>
+      </div>
+      <div class="mode-desc" id="mode-desc">Matches facial bone structure + hair style/length + hair color + jawline/facial hair</div>
+
+      <div class="custom-weights-box" id="custom-weights-box">
+        <div class="slider-row">
+          <label for="w-face">&#x1F3AD; Face Structure</label>
+          <input type="range" id="w-face" min="0" max="100" value="45">
+          <span class="slider-val" id="w-face-val">45%</span>
+        </div>
+        <div class="slider-row">
+          <label for="w-style">&#x1F487; Hair Style &amp; Length</label>
+          <input type="range" id="w-style" min="0" max="100" value="25">
+          <span class="slider-val" id="w-style-val">25%</span>
+        </div>
+        <div class="slider-row">
+          <label for="w-color">&#x1F3A8; Hair Color &amp; Tone</label>
+          <input type="range" id="w-color" min="0" max="100" value="20">
+          <span class="slider-val" id="w-color-val">20%</span>
+        </div>
+        <div class="slider-row">
+          <label for="w-vibe">&#x1F9D4; Facial Hair &amp; Vibe</label>
+          <input type="range" id="w-vibe" min="0" max="100" value="10">
+          <span class="slider-val" id="w-vibe-val">10%</span>
+        </div>
+        <button type="button" class="apply-weights-btn" id="apply-weights-btn">&#x26A1; Re-Compare with Custom Weights</button>
+      </div>
+    </div>
 
     <div class="upload-zone">
       <input type="file" id="upload" accept="image/*" capture="user">
       <button class="btn btn-primary" onclick="document.getElementById('upload').click()">
-        &#x1F4F7;&nbsp; Upload a photo
+        &#x1F4F7;&nbsp; Upload / Snap Photo
       </button>
-      <div class="divider">or</div>
       <button class="btn btn-secondary" id="phone-btn">
-        &#x1F4F1;&nbsp; Scan QR with your phone
+        &#x1F4F1;&nbsp; Party QR (Scan from Phone)
       </button>
     </div>
   </section>

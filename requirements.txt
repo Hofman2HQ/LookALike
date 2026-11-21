@@ -8,6 +8,8 @@ opencv-python-headless
 requests
 tqdm
 datasets
+huggingface_hub
+pyarrow
 onnxruntime
 pytest
 pytest-asyncio
