@@ -114,9 +114,21 @@ def test_session_lifecycle_and_mobile_upload():
 
     create_resp = client.post("/session/create?mode=full_head")
     assert create_resp.status_code == 200
-    sid = create_resp.json()["session_id"]
+    c_data = create_resp.json()
+    sid = c_data["session_id"]
+    poll_token = c_data["poll_token"]
 
-    status_resp = client.get(f"/session/{sid}/status")
+    # Unauthorized poll without poll_token or with wrong token must be rejected (403)
+    unauth_resp = client.get(f"/session/{sid}/status")
+    assert unauth_resp.status_code == 403
+    wrong_resp = client.get(
+        f"/session/{sid}/status", headers={"X-Poll-Token": "wrong-token"}
+    )
+    assert wrong_resp.status_code == 403
+
+    status_resp = client.get(
+        f"/session/{sid}/status", headers={"X-Poll-Token": poll_token}
+    )
     assert status_resp.status_code == 200
     assert status_resp.json()["status"] == "waiting"
 
@@ -126,6 +138,54 @@ def test_session_lifecycle_and_mobile_upload():
         b64 = base64.b64encode(samples[0].read_bytes()).decode("utf-8")
         up_resp = client.post(f"/mobile/{sid}/upload", json={"image_base64": b64})
         assert up_resp.status_code == 200
-        done_resp = client.get(f"/session/{sid}/status")
+
+        done_resp = client.get(
+            f"/session/{sid}/status", headers={"X-Poll-Token": poll_token}
+        )
+        assert done_resp.status_code == 200
         assert done_resp.json()["status"] == "done"
         assert done_resp.json()["user_image_base64"].startswith("data:image/jpeg;base64,")
+
+        # Burn-after-reading: once retrieved, session & selfie are wiped from RAM (404)
+        after_resp = client.get(
+            f"/session/{sid}/status", headers={"X-Poll-Token": poll_token}
+        )
+        assert after_resp.status_code == 404
+
+
+def test_security_headers_and_input_validation():
+    # 1. Security headers present
+    h_resp = client.get("/health")
+    assert h_resp.headers.get("X-Content-Type-Options") == "nosniff"
+    assert h_resp.headers.get("X-Frame-Options") == "DENY"
+    assert h_resp.headers.get("Referrer-Policy") == "no-referrer"
+    assert "default-src 'self'" in h_resp.headers.get("Content-Security-Policy", "")
+
+    # 2. Host header injection blocked on /session/create
+    s_resp = client.post(
+        "/session/create",
+        headers={
+            "X-Forwarded-Proto": "javascript",
+            "X-Forwarded-Host": "evil.example.com/phish?x=1",
+        },
+    )
+    assert s_resp.status_code == 200
+    mobile_url = s_resp.json()["mobile_url"]
+    assert not mobile_url.startswith("javascript:")
+    assert "evil.example.com/phish" not in mobile_url
+
+    # 3. Unsupported mode & arbitrary weight keys rejected by Pydantic
+    bad_mode = client.post(
+        "/match", json={"image_base64": _encode_dummy_img(), "mode": "<script>"}
+    )
+    assert bad_mode.status_code == 422
+
+    bad_weights = client.post(
+        "/match",
+        json={
+            "image_base64": _encode_dummy_img(),
+            "mode": "custom",
+            "weights": {"malicious_key": 100.0},
+        },
+    )
+    assert bad_weights.status_code == 422

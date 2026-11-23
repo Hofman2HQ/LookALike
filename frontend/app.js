@@ -383,11 +383,11 @@ function startPartyScanView(userImgDataUrl) {
     rouletteCard.className = 'face-box-card';
     rouletteCard.innerHTML = `
         <div class="face-box-media">
-            <img id="roulette-img" src="${firstCeleb.photo_url}" alt="Candidate" style="${firstCeleb.photo_url ? '' : 'display:none'}">
+            <img id="roulette-img" src="${escapeHtml(firstCeleb.photo_url)}" alt="Candidate" style="${firstCeleb.photo_url ? '' : 'display:none'}">
         </div>
         <div class="face-box-footer">
             <div class="face-box-label">CANDIDATE MATCH</div>
-            <div class="face-box-name" id="roulette-name">${firstCeleb.name}</div>
+            <div class="face-box-name" id="roulette-name">${escapeHtml(firstCeleb.name)}</div>
         </div>
     `;
 
@@ -651,14 +651,14 @@ function showMatches(matches, bestGuess = false, details = null, userImgDataUrl 
         const st = (details && details.subject_traits) || null;
         const traitsHtml = st
             ? `<div class="trait-chips">
-                 <span class="trait-chip">🎨 ${st.hair_color}</span>
-                 <span class="trait-chip">💇 ${st.hair_style}</span>
-                 <span class="trait-chip">🧔 ${st.facial_hair}</span>
+                 <span class="trait-chip">🎨 ${escapeHtml(st.hair_color)}</span>
+                 <span class="trait-chip">💇 ${escapeHtml(st.hair_style)}</span>
+                 <span class="trait-chip">🧔 ${escapeHtml(st.facial_hair)}</span>
                </div>`
             : '';
         userInfo.innerHTML = `
             <div class="user-selfie-title">Your Head &amp; Face</div>
-            <div class="user-selfie-sub">✓ 5-Point Lock (${confPct}%)</div>
+            <div class="user-selfie-sub">✓ 5-Point Lock (${escapeHtml(confPct)}%)</div>
             ${traitsHtml}
         `;
 
@@ -742,8 +742,8 @@ function showMatches(matches, bestGuess = false, details = null, userImgDataUrl 
             const chips = document.createElement('div');
             chips.className = 'trait-chips';
             chips.innerHTML = `
-                <span class="trait-chip">🎨 ${m.traits.hair_color}</span>
-                <span class="trait-chip">💇 ${m.traits.hair_style}</span>
+                <span class="trait-chip">🎨 ${escapeHtml(m.traits.hair_color)}</span>
+                <span class="trait-chip">💇 ${escapeHtml(m.traits.hair_style)}</span>
             `;
             info.appendChild(chips);
         }
@@ -908,23 +908,23 @@ function showMatches(matches, bestGuess = false, details = null, userImgDataUrl 
                 <div class="kpi-card">
                     <div class="kpi-label">Face Lock Confidence</div>
                     <div class="kpi-value">${(d.face_confidence * 100).toFixed(1)}%</div>
-                    <div class="kpi-sub">${d.detector}</div>
+                    <div class="kpi-sub">${escapeHtml(d.detector)}</div>
                 </div>
             </div>
 
             <div class="details-section-title">
-                <span>💇 Full-Head &amp; Hair Feature Breakdown — You vs. #${activeIdx + 1} ${activeMatch.name}</span>
-                <span>Mode Weights: ${weightsStr}</span>
+                <span>💇 Full-Head &amp; Hair Feature Breakdown — You vs. #${activeIdx + 1} ${escapeHtml(activeMatch.name)}</span>
+                <span>Mode Weights: ${escapeHtml(weightsStr)}</span>
             </div>
             <div class="match-metrics-grid" style="margin-bottom:1.35rem">
                 <div class="metric-row"><span>🎭 Facial Structure Match</span><span>${facePct}% (cos θ = ${rawFaceCos})</span></div>
                 <div class="metric-row"><span>💇 Hair Style &amp; Length Match</span><span>${stylePct}</span></div>
                 <div class="metric-row"><span>🎨 Hair Color &amp; Tone Match</span><span>${colorPct}</span></div>
                 <div class="metric-row"><span>🧔 Head Vibe &amp; Jawline Match</span><span>${vibePct}</span></div>
-                <div class="metric-row"><span>Your Hair Color vs. Celeb</span><span>${uTraits.hair_color} ↔ ${cTraits.hair_color}</span></div>
-                <div class="metric-row"><span>Your Hair Style vs. Celeb</span><span>${uTraits.hair_style} ↔ ${cTraits.hair_style}</span></div>
-                <div class="metric-row"><span>Your Facial Hair vs. Celeb</span><span>${uTraits.facial_hair} ↔ ${cTraits.facial_hair}</span></div>
-                <div class="metric-row"><span>Combined Resemblance</span><span>${activePct}% (${percentile})</span></div>
+                <div class="metric-row"><span>Your Hair Color vs. Celeb</span><span>${escapeHtml(uTraits.hair_color)} ↔ ${escapeHtml(cTraits.hair_color)}</span></div>
+                <div class="metric-row"><span>Your Hair Style vs. Celeb</span><span>${escapeHtml(uTraits.hair_style)} ↔ ${escapeHtml(cTraits.hair_style)}</span></div>
+                <div class="metric-row"><span>Your Facial Hair vs. Celeb</span><span>${escapeHtml(uTraits.facial_hair)} ↔ ${escapeHtml(cTraits.facial_hair)}</span></div>
+                <div class="metric-row"><span>Combined Resemblance</span><span>${activePct}% (${escapeHtml(percentile)})</span></div>
             </div>
 
             <div class="details-section-title">
@@ -1016,7 +1016,7 @@ phonBtn.addEventListener('click', async () => {
         return;
     }
 
-    const {session_id, mobile_url} = sessionData;
+    const {session_id, mobile_url, poll_token} = sessionData;
 
     results.innerHTML = '';
 
@@ -1064,7 +1064,9 @@ phonBtn.addEventListener('click', async () => {
 
     _pollInterval = setInterval(async () => {
         try {
-            const pollResp = await fetch(`/session/${session_id}/status`);
+            const pollResp = await fetch(`/session/${encodeURIComponent(session_id)}/status`, {
+                headers: poll_token ? {'X-Poll-Token': poll_token} : {},
+            });
             if (!pollResp.ok) { clearInterval(_pollInterval); return; }
             const data = await pollResp.json();
             if (data.status === 'done') {

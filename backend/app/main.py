@@ -1,23 +1,29 @@
-from collections import OrderedDict
+from collections import OrderedDict, deque
 from datetime import datetime, timezone
 import base64
 import hashlib
+import hmac
+import io
 import math
+import os
 from pathlib import Path
 import random
+import re
+import secrets
 import socket
 import threading
 import time
-from typing import Optional, Dict, Tuple, Any
+from typing import Optional, Dict, Tuple, Any, Deque
 import uuid
 
 import cv2
 import numpy as np
+from PIL import Image
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from .models import MatchRequest, MatchResponse, Match, ComparisonDetails
+from .models import MatchRequest, MatchResponse, Match, ComparisonDetails, AllowedMode
 from .face import get_pipeline
 from .faiss_index import get_index, MODE_WEIGHTS
 
@@ -33,23 +39,90 @@ if FRONTEND_DIR.exists():
     app.mount("/assets", StaticFiles(directory=FRONTEND_DIR), name="assets")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
-# Bounded, TTL-expiring in-memory store for phone-upload sessions
-SESSION_TTL_SEC = 600.0  # 10 minutes
+# ── Security & Resource Limits ────────────────────────────────────────────
+SESSION_TTL_SEC = 300.0          # 5 minutes max lifetime for waiting QR sessions
 MAX_SESSIONS = 100
-MAX_IMAGE_BYTES = 10 * 1024 * 1024  # 10 MB safety cap
+MAX_IMAGE_BYTES = 5 * 1024 * 1024  # 5 MB compressed payload limit
+MAX_IMAGE_DIM = 4096               # Max width or height in pixels
+MAX_IMAGE_PIXELS = 16_000_000      # 16 MP decompression-bomb cap
+_SAFE_HOST_RE = re.compile(r"^[a-zA-Z0-9.-]+(?::\d{1,5})?$")
+_UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
 
 _sessions: OrderedDict[str, Dict[str, Any]] = OrderedDict()
 _sessions_lock = threading.Lock()
 
-# Small LRU cache mapping SHA-256(image_bytes) -> (embedding, face_info, (iw, ih))
+# Short-lived in-memory LRU cache mapping SHA-256(image_bytes) -> (ts, embedding, face_info, (iw, ih))
 # so switching modes/sliders on the same photo skips re-running ONNX inference.
-_EMBED_CACHE_MAX = 24
-_embed_cache: OrderedDict[bytes, Tuple[np.ndarray, Dict[str, Any], Tuple[int, int]]] = OrderedDict()
+# Entries auto-expire after 120 seconds so biometric vectors never linger in RAM.
+_EMBED_CACHE_MAX = 16
+_EMBED_CACHE_TTL_SEC = 120.0
+_embed_cache: OrderedDict[bytes, Tuple[float, np.ndarray, Dict[str, Any], Tuple[int, int]]] = OrderedDict()
 _embed_cache_lock = threading.Lock()
 
+# Per-IP sliding-window rate limiter for CPU-heavy & session-creation endpoints
+_RATE_WINDOW_SEC = 60.0
+_RATE_MAX_REQUESTS = 45
+_rate_buckets: Dict[str, Deque[float]] = {}
+_rate_lock = threading.Lock()
 
-def _prune_sessions() -> None:
-    """Evict expired sessions and enforce MAX_SESSIONS capacity."""
+
+@app.middleware("http")
+async def security_headers_middleware(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    response.headers["Permissions-Policy"] = "camera=(self), microphone=(), geolocation=()"
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data: blob:; "
+        "connect-src 'self'; "
+        "frame-ancestors 'none'; "
+        "base-uri 'self';"
+    )
+    if request.url.path.startswith(("/match", "/session", "/mobile")):
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+    return response
+
+
+def _check_rate_limit(request: Request) -> None:
+    """Enforce a per-IP sliding window rate limit on write/compute endpoints."""
+    client_host = (request.client.host if request.client else "unknown") or "unknown"
+    if client_host in ("testclient", "127.0.0.1", "::1"):
+        # Still track local requests with a higher ceiling so automated test suites don't trip
+        limit = _RATE_MAX_REQUESTS * 4
+    else:
+        limit = _RATE_MAX_REQUESTS
+
+    now = time.monotonic()
+    with _rate_lock:
+        if len(_rate_buckets) > 500:
+            # Periodic cleanup of idle IP buckets
+            stale_ips = [
+                ip for ip, dq in _rate_buckets.items() if not dq or (now - dq[-1]) > _RATE_WINDOW_SEC
+            ]
+            for ip in stale_ips:
+                _rate_buckets.pop(ip, None)
+
+        dq = _rate_buckets.get(client_host)
+        if dq is None:
+            dq = deque()
+            _rate_buckets[client_host] = dq
+        while dq and (now - dq[0]) > _RATE_WINDOW_SEC:
+            dq.popleft()
+        if len(dq) >= limit:
+            raise HTTPException(
+                status_code=429,
+                detail="Too many requests. Please wait a moment before trying again.",
+            )
+        dq.append(now)
+
+
+def _prune_sessions_and_cache() -> None:
+    """Evict expired QR sessions and expired biometric cache entries."""
     now = time.monotonic()
     with _sessions_lock:
         expired = [
@@ -62,23 +135,63 @@ def _prune_sessions() -> None:
         while len(_sessions) >= MAX_SESSIONS:
             _sessions.popitem(last=False)
 
+    with _embed_cache_lock:
+        expired_hashes = [
+            h for h, item in _embed_cache.items() if now - item[0] > _EMBED_CACHE_TTL_SEC
+        ]
+        for h in expired_hashes:
+            _embed_cache.pop(h, None)
 
-def _compress_preview_b64(image_bytes: bytes, max_side: int = 360) -> str:
-    """Downscale a phone upload into a compact (~15 KB) JPEG data URL for desktop preview."""
+
+def _safe_decode_image(image_bytes: bytes) -> np.ndarray:
+    """Validate image magic bytes and dimensions before decoding full pixel buffer.
+
+    Protects against image decompression bombs (e.g. a small PNG file whose header
+    claims 25000x25000 pixels to trigger a multi-gigabyte allocation) and malformed files.
+    """
+    if len(image_bytes) < 12:
+        raise HTTPException(status_code=400, detail="Invalid image data")
+
+    # Verify image header dimensions lazily via PIL without decompressing the full raster
     try:
-        arr = np.frombuffer(image_bytes, dtype=np.uint8)
-        img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
-        if img is None:
-            return ""
-        ih, iw = img.shape[:2]
+        with Image.open(io.BytesIO(image_bytes)) as pil_img:
+            fmt = (pil_img.format or "").upper()
+            if fmt not in ("JPEG", "PNG", "WEBP", "BMP", "MPO"):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Unsupported image format. Please upload a JPEG, PNG, or WebP photo.",
+                )
+            w, h = pil_img.size
+            if w <= 0 or h <= 0 or w > MAX_IMAGE_DIM or h > MAX_IMAGE_DIM or (w * h) > MAX_IMAGE_PIXELS:
+                raise HTTPException(
+                    status_code=413,
+                    detail=f"Image dimensions ({w}x{h}) exceed the {MAX_IMAGE_DIM}x{MAX_IMAGE_DIM} security limit.",
+                )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail="Invalid image data") from exc
+
+    img_np = np.frombuffer(image_bytes, dtype=np.uint8)
+    image = cv2.imdecode(img_np, cv2.IMREAD_COLOR)
+    if image is None:
+        raise HTTPException(status_code=400, detail="Invalid image data")
+    return image
+
+
+def _compress_preview_b64(image: np.ndarray, max_side: int = 360) -> str:
+    """Downscale an already-validated image into a compact (~15 KB) JPEG data URL for desktop preview."""
+    try:
+        ih, iw = image.shape[:2]
+        work = image
         if max(ih, iw) > max_side:
             scale = max_side / float(max(ih, iw))
-            img = cv2.resize(
-                img,
+            work = cv2.resize(
+                image,
                 (max(1, int(round(iw * scale))), max(1, int(round(ih * scale)))),
                 interpolation=cv2.INTER_AREA,
             )
-        ok, buf = cv2.imencode(".jpg", img, [int(cv2.IMWRITE_JPEG_QUALITY), 78])
+        ok, buf = cv2.imencode(".jpg", work, [int(cv2.IMWRITE_JPEG_QUALITY), 78])
         if not ok:
             return ""
         return "data:image/jpeg;base64," + base64.b64encode(buf.tobytes()).decode("ascii")
@@ -110,15 +223,27 @@ def _local_ip() -> str:
 
 
 def _build_mobile_url(request: Request, sid: str) -> str:
-    """Build a mobile upload URL that works both on cloud hosts and local Wi-Fi."""
+    """Build a sanitized mobile upload URL that prevents Host header injection."""
+    pinned_base = os.environ.get("PUBLIC_BASE_URL", "").strip().rstrip("/")
+    if pinned_base.startswith(("http://", "https://")):
+        return f"{pinned_base}/mobile/{sid}"
+
     forwarded_proto = request.headers.get("x-forwarded-proto")
     forwarded_host = request.headers.get("x-forwarded-host") or request.headers.get("host")
-    scheme = (
-        forwarded_proto.split(",")[0].strip() if forwarded_proto else request.url.scheme
-    ) or "http"
+
+    raw_scheme = (
+        forwarded_proto.split(",")[0].strip().lower()
+        if forwarded_proto
+        else request.url.scheme.lower()
+    )
+    scheme = raw_scheme if raw_scheme in ("http", "https") else "http"
+
     host_header = (
         forwarded_host.split(",")[0].strip() if forwarded_host else request.url.netloc
     ) or ""
+    if not _SAFE_HOST_RE.match(host_header):
+        host_header = ""
+
     hostname = host_header.split(":")[0].lower()
 
     if hostname and hostname not in ("localhost", "127.0.0.1", "0.0.0.0", "testserver"):
@@ -133,7 +258,9 @@ def _resolve_weights(mode: str, custom_weights: Optional[Dict[str, float]]) -> D
     if custom_weights:
         for k in ("face", "hair_style", "hair_color", "head_vibe"):
             if k in custom_weights and custom_weights[k] is not None:
-                w[k] = max(0.0, float(custom_weights[k]))
+                fval = float(custom_weights[k])
+                if math.isfinite(fval):
+                    w[k] = max(0.0, min(1000.0, fval))
     s = sum(w.values())
     if s <= 0:
         w = dict(MODE_WEIGHTS["face"])
@@ -143,10 +270,11 @@ def _resolve_weights(mode: str, custom_weights: Optional[Dict[str, float]]) -> D
 
 def _run_match(
     image_base64: str,
-    mode: str = "face",
+    mode: AllowedMode = "face",
     custom_weights: Optional[Dict[str, float]] = None,
-) -> tuple[list, bool, ComparisonDetails]:
-    """Decode, detect, 5-point align, embed, and return a carousel of top celebrity matches + telemetry."""
+) -> tuple[list, bool, ComparisonDetails, Optional[np.ndarray]]:
+    """Decode, validate, detect, 5-point align, embed, and search."""
+    _prune_sessions_and_cache()
     t_start = time.perf_counter()
     pipeline = get_pipeline()
     index = get_index()
@@ -158,19 +286,19 @@ def _run_match(
     if len(raw_b64) > (MAX_IMAGE_BYTES * 4 // 3) + 256:
         raise HTTPException(
             status_code=413,
-            detail="Image payload too large. Please upload an image under 10 MB.",
+            detail="Image payload too large. Please upload an image under 5 MB.",
         )
 
     t_dec0 = time.perf_counter()
     try:
-        image_bytes = base64.b64decode(raw_b64)
+        image_bytes = base64.b64decode(raw_b64, validate=False)
     except Exception as exc:
         raise HTTPException(status_code=400, detail="Invalid base64 data") from exc
 
     if len(image_bytes) > MAX_IMAGE_BYTES:
         raise HTTPException(
             status_code=413,
-            detail="Image payload too large. Please upload an image under 10 MB.",
+            detail="Image payload too large. Please upload an image under 5 MB.",
         )
 
     is_real_pipeline = hasattr(pipeline, "get_embedding_with_info") and not hasattr(
@@ -179,28 +307,31 @@ def _run_match(
     img_hash = hashlib.sha256(image_bytes).digest() if is_real_pipeline else None
 
     cached_item = None
+    now_mono = time.monotonic()
     if img_hash is not None:
         with _embed_cache_lock:
-            cached_item = _embed_cache.get(img_hash)
-            if cached_item is not None:
-                _embed_cache.move_to_end(img_hash)
+            item = _embed_cache.get(img_hash)
+            if item is not None:
+                if now_mono - item[0] <= _EMBED_CACHE_TTL_SEC:
+                    cached_item = item
+                    _embed_cache.move_to_end(img_hash)
+                else:
+                    _embed_cache.pop(img_hash, None)
 
+    decoded_image: Optional[np.ndarray] = None
     if cached_item is not None:
-        embedding, face_info, (iw, ih) = cached_item
+        _, embedding, face_info, (iw, ih) = cached_item
         decode_ms = (time.perf_counter() - t_dec0) * 1000.0
     else:
-        img_np = np.frombuffer(image_bytes, dtype=np.uint8)
-        image = cv2.imdecode(img_np, cv2.IMREAD_COLOR)
-        if image is None:
-            raise HTTPException(status_code=400, detail="Invalid image data")
+        decoded_image = _safe_decode_image(image_bytes)
         decode_ms = (time.perf_counter() - t_dec0) * 1000.0
-        ih, iw = image.shape[:2]
+        ih, iw = decoded_image.shape[:2]
 
         if is_real_pipeline:
-            embedding, face_info = pipeline.get_embedding_with_info(image)
+            embedding, face_info = pipeline.get_embedding_with_info(decoded_image)
         else:
             t_emb0 = time.perf_counter()
-            embedding = pipeline.get_embedding(image)
+            embedding = pipeline.get_embedding(decoded_image)
             el_ms = (time.perf_counter() - t_emb0) * 1000.0
             face_info = {
                 "detect_align_ms": round(el_ms * 0.4, 2),
@@ -215,7 +346,7 @@ def _run_match(
 
         if embedding is not None and img_hash is not None:
             with _embed_cache_lock:
-                _embed_cache[img_hash] = (embedding, face_info, (iw, ih))
+                _embed_cache[img_hash] = (now_mono, embedding, face_info, (iw, ih))
                 while len(_embed_cache) > _EMBED_CACHE_MAX:
                     _embed_cache.popitem(last=False)
 
@@ -274,7 +405,7 @@ def _run_match(
     )
 
     if not all_candidates:
-        return [], True, details
+        return [], True, details, decoded_image
 
     filtered = [m for m in all_candidates if m["score"] >= 0.12]
     if len(filtered) < min(5, len(all_candidates)):
@@ -306,7 +437,7 @@ def _run_match(
         )
 
     best_guess = matches[0]["score"] < 0.22
-    return matches, best_guess, details
+    return matches, best_guess, details, decoded_image
 
 
 # ── Core routes ───────────────────────────────────────────────────────────
@@ -335,8 +466,9 @@ def celebrities_sample() -> dict:
 
 
 @app.post("/match", response_model=MatchResponse)
-def match(req: MatchRequest) -> MatchResponse:
-    matches, best_guess, details = _run_match(
+def match(req: MatchRequest, request: Request) -> MatchResponse:
+    _check_rate_limit(request)
+    matches, best_guess, details, _ = _run_match(
         req.image_base64, mode=req.mode, custom_weights=req.weights
     )
     return MatchResponse(
@@ -351,36 +483,67 @@ def match(req: MatchRequest) -> MatchResponse:
 # ── Phone-upload via QR code ──────────────────────────────────────────────
 
 
+def _validate_session_id(session_id: str) -> None:
+    if not _UUID_RE.match(session_id):
+        raise HTTPException(status_code=404, detail="Session not found")
+
+
 @app.post("/session/create")
-def create_session(request: Request, mode: str = "full_head") -> dict:
-    _prune_sessions()
+def create_session(request: Request, mode: AllowedMode = "full_head") -> dict:
+    _check_rate_limit(request)
+    _prune_sessions_and_cache()
     sid = str(uuid.uuid4())
+    poll_token = secrets.token_urlsafe(24)
     with _sessions_lock:
         _sessions[sid] = {
             "status": "waiting",
             "matches": None,
             "mode": mode,
+            "_poll_token": poll_token,
             "_created_at": time.monotonic(),
         }
     mobile_url = _build_mobile_url(request, sid)
-    return {"session_id": sid, "mobile_url": mobile_url}
+    return {"session_id": sid, "mobile_url": mobile_url, "poll_token": poll_token}
 
 
 @app.get("/session/{session_id}/status")
-def session_status(session_id: str) -> dict:
-    _prune_sessions()
+def session_status(
+    session_id: str,
+    request: Request,
+    token: Optional[str] = None,
+) -> dict:
+    _validate_session_id(session_id)
+    _prune_sessions_and_cache()
+    provided_token = request.headers.get("x-poll-token") or token
+
     with _sessions_lock:
         session = _sessions.get(session_id)
         if session is None:
             raise HTTPException(status_code=404, detail="Session not found")
-        return {k: v for k, v in session.items() if not k.startswith("_")}
+
+        expected_token = session.get("_poll_token")
+        # Strictly require the cryptographic poll_token (issued only to the desktop creator,
+        # never present in the QR code URL) so third parties cannot read the uploaded selfie.
+        if expected_token is not None:
+            if not provided_token or not hmac.compare_digest(provided_token, expected_token):
+                raise HTTPException(status_code=403, detail="Invalid or missing session poll token")
+
+        payload = {k: v for k, v in session.items() if not k.startswith("_")}
+        # Burn-after-reading: once the completed match + selfie preview has been delivered
+        # to the authorized desktop client, immediately wipe the selfie & session from RAM.
+        if session.get("status") == "done":
+            _sessions.pop(session_id, None)
+
+        return payload
 
 
 @app.get("/mobile/{session_id}", response_class=HTMLResponse)
 def mobile_page(session_id: str):
-    _prune_sessions()
+    _validate_session_id(session_id)
+    _prune_sessions_and_cache()
     with _sessions_lock:
-        exists = session_id in _sessions
+        session = _sessions.get(session_id)
+        exists = session is not None and session.get("status") == "waiting"
     if not exists:
         raise HTTPException(status_code=404, detail="Session not found or expired")
     if not (FRONTEND_DIR / "mobile.html").exists():
@@ -389,22 +552,37 @@ def mobile_page(session_id: str):
 
 
 @app.post("/mobile/{session_id}/upload")
-def mobile_upload(session_id: str, req: MatchRequest) -> dict:
-    _prune_sessions()
+def mobile_upload(session_id: str, req: MatchRequest, request: Request) -> dict:
+    _validate_session_id(session_id)
+    _check_rate_limit(request)
+    _prune_sessions_and_cache()
     with _sessions_lock:
         session = _sessions.get(session_id)
         if session is None:
             raise HTTPException(status_code=404, detail="Session not found or expired")
-        if session["status"] == "done":
+        if session["status"] != "waiting":
             return {"status": "already_done"}
+        # Atomically mark as "processing" so two concurrent uploads to the same QR code cannot race
+        session["status"] = "processing"
         session_mode = session.get("mode") or req.mode or "full_head"
         created_at = session.get("_created_at", time.monotonic())
+        poll_token = session.get("_poll_token")
 
-    matches, best_guess, details = _run_match(
-        req.image_base64, mode=session_mode, custom_weights=req.weights
-    )
-    raw_b64 = req.image_base64.split(",", 1)[1] if "," in req.image_base64 else req.image_base64
-    compact_preview = _compress_preview_b64(base64.b64decode(raw_b64))
+    try:
+        matches, best_guess, details, decoded_img = _run_match(
+            req.image_base64, mode=session_mode, custom_weights=req.weights
+        )
+    except Exception:
+        # Reset back to "waiting" if face detection failed (422) so the user can retake their selfie
+        with _sessions_lock:
+            if session_id in _sessions and _sessions[session_id].get("status") == "processing":
+                _sessions[session_id]["status"] = "waiting"
+        raise
+
+    if decoded_img is None:
+        raw_b64 = req.image_base64.split(",", 1)[1] if "," in req.image_base64 else req.image_base64
+        decoded_img = _safe_decode_image(base64.b64decode(raw_b64, validate=False))
+    compact_preview = _compress_preview_b64(decoded_img) if decoded_img is not None else ""
 
     with _sessions_lock:
         if session_id in _sessions:
@@ -414,6 +592,7 @@ def mobile_upload(session_id: str, req: MatchRequest) -> dict:
                 "best_guess": best_guess,
                 "details": details.model_dump() if hasattr(details, "model_dump") else details.dict(),
                 "user_image_base64": compact_preview,
+                "_poll_token": poll_token,
                 "_created_at": created_at,
             }
     return {"status": "ok"}

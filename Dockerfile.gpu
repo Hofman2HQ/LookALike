@@ -5,17 +5,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-pip \
     libgomp1 \
     libglib2.0-0 \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd -m -u 1000 appuser
 
 WORKDIR /app
 
 COPY requirements.txt .
 RUN pip3 install --no-cache-dir -r requirements.txt && pip3 install --no-cache-dir onnxruntime-gpu
 
-COPY backend ./backend
-COPY frontend ./frontend
-COPY data ./data
-COPY static ./static
+COPY --chown=appuser:appuser backend ./backend
+COPY --chown=appuser:appuser frontend ./frontend
+COPY --chown=appuser:appuser data ./data
+COPY --chown=appuser:appuser static ./static
+
+USER appuser
 
 RUN python3 -c "from backend.app.face import get_pipeline; get_pipeline()"
 
