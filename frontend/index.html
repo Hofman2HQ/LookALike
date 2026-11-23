@@ -931,6 +931,75 @@
       66%  { content: '..'; }
       100% { content: '...'; }
     }
+
+    /* ── Live Webcam Party Booth Modal ────────────────── */
+    .webcam-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 8, 14, 0.85);
+      backdrop-filter: blur(10px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+    }
+    .webcam-modal.open { display: flex; }
+    .webcam-box {
+      background: var(--surface);
+      border: 1px solid rgba(124,106,255,0.35);
+      border-radius: 24px;
+      padding: 1.5rem;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.65);
+    }
+    .webcam-box h3 { font-size: 1.15rem; margin-bottom: 0.35rem; }
+    .webcam-box p  { font-size: 0.82rem; color: var(--muted); margin-bottom: 1rem; }
+    .webcam-stage {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      max-width: 340px;
+      margin: 0 auto 1.15rem;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #050508;
+      border: 1px solid var(--border);
+    }
+    .webcam-stage video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+      display: block;
+    }
+    .webcam-guide-oval {
+      position: absolute;
+      inset: 12% 18%;
+      border: 2px dashed rgba(34,211,238,0.55);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .webcam-countdown {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 4.5rem;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 28px var(--accent);
+      background: rgba(10,10,16,0.35);
+    }
+    .webcam-actions {
+      display: flex;
+      gap: 0.6rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
   </style>
 </head>
 <body>
@@ -985,13 +1054,33 @@
     <div class="upload-zone">
       <input type="file" id="upload" accept="image/*" capture="user">
       <button class="btn btn-primary" onclick="document.getElementById('upload').click()">
-        &#x1F4F7;&nbsp; Upload / Snap Photo
+        &#x1F4C1;&nbsp; Upload Photo
+      </button>
+      <button class="btn btn-secondary" id="webcam-btn">
+        &#x1F3A5;&nbsp; Live Camera
       </button>
       <button class="btn btn-secondary" id="phone-btn">
-        &#x1F4F1;&nbsp; Party QR (Scan from Phone)
+        &#x1F4F1;&nbsp; Party QR (Phone)
       </button>
     </div>
   </section>
+
+  <div class="webcam-modal" id="webcam-modal">
+    <div class="webcam-box">
+      <h3>&#x1F3A5; Party Photo Booth</h3>
+      <p>Center your head &amp; hair inside the guide and snap your photo.</p>
+      <div class="webcam-stage">
+        <video id="webcam-video" autoplay playsinline muted></video>
+        <div class="webcam-guide-oval"></div>
+        <div class="webcam-countdown" id="webcam-countdown">3</div>
+      </div>
+      <div class="webcam-actions">
+        <button type="button" class="btn btn-primary" id="webcam-snap-timer-btn">&#x23F1;&#xFE0F; 3s Countdown</button>
+        <button type="button" class="btn btn-secondary" id="webcam-snap-now-btn">&#x1F4F8; Instant Snap</button>
+        <button type="button" class="btn btn-secondary" id="webcam-close-btn">&#x2715; Cancel</button>
+      </div>
+    </div>
+  </div>
 
   <div id="results"></div>
 

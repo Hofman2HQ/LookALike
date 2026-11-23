@@ -67,6 +67,7 @@ class FaissIndex:
         self._mtime: float = 0.0
         self.index = None
         self.meta: Dict[str, Any] = {}
+        self.csls_baseline: Optional[np.ndarray] = None
         self.hair_color_vecs: Optional[np.ndarray] = None
         self.hair_style_vecs: Optional[np.ndarray] = None
         self.head_vibe_vecs: Optional[np.ndarray] = None
@@ -86,6 +87,20 @@ class FaissIndex:
         else:
             dim = get_pipeline().embedding_size
             self.index = faiss.IndexFlatIP(dim)
+
+        # Precompute CSLS (Cross-Domain Similarity Local Scaling) hubness baseline
+        # so "hub" centroids near the global face mean do not unfairly dominate top-K matches.
+        self.csls_baseline = None
+        if self.index is not None and self.index.ntotal > 12:
+            try:
+                ntotal = int(self.index.ntotal)
+                all_vecs = self.index.reconstruct_n(0, ntotal)
+                k_nbr = min(11, ntotal)
+                nbr_scores, _ = self.index.search(all_vecs, k_nbr)
+                r_t = nbr_scores[:, 1:].mean(axis=1).astype(np.float32)
+                self.csls_baseline = r_t - float(r_t.mean())
+            except Exception:
+                self.csls_baseline = None
 
         if os.path.exists(self.meta_path):
             with open(self.meta_path, "r", encoding="utf-8") as f:
@@ -185,10 +200,16 @@ class FaissIndex:
 
         # Full multi-modal scoring across all N celebrities
         raw_face_scores, raw_face_indices = self.index.search(q, ntotal)
-        face_sims = np.zeros(ntotal, dtype=np.float32)
+        raw_face_sims = np.zeros(ntotal, dtype=np.float32)
         for s, idx in zip(raw_face_scores[0], raw_face_indices[0]):
             if 0 <= idx < ntotal:
-                face_sims[idx] = float(s)
+                raw_face_sims[idx] = float(s)
+
+        # Apply CSLS hubness correction to penalize generic "hub" centroids
+        if self.csls_baseline is not None and len(self.csls_baseline) == ntotal:
+            face_sims = raw_face_sims - 0.35 * self.csls_baseline
+        else:
+            face_sims = raw_face_sims
 
         q_color = head_features["hair_color_vec"].astype(np.float32)
         q_style = head_features["hair_style_vec"].astype(np.float32)
@@ -216,17 +237,15 @@ class FaissIndex:
             + weights["hair_color"] * z_color
             + weights["head_vibe"] * z_vibe
         )
-        # Re-standardize combined_z to unit variance so convex weight combinations
-        # do not shrink the variance of effective_scores
         combined_z = _zscore(raw_combined_z)
 
-        face_mean = float(face_sims.mean())
-        face_std = max(float(face_sims.std()), 0.06)
+        face_mean = float(raw_face_sims.mean())
+        face_std = max(float(raw_face_sims.std()), 0.06)
         effective_scores = np.clip(face_mean + combined_z * face_std, -1.0, 0.99)
 
         if weights["face"] >= 0.999:
             order = np.argsort(-face_sims)
-            effective_scores = face_sims
+            effective_scores = np.clip(face_sims, -1.0, 0.99)
         else:
             order = np.argsort(-combined_z)
 
@@ -250,7 +269,7 @@ class FaissIndex:
                 {
                     "name": name,
                     "score": eff_score,
-                    "face_score": float(face_sims[idx_int]),
+                    "face_score": float(raw_face_sims[idx_int]),
                     "hair_style_score": _pct_from_z(
                         float(z_style[idx_int]), float(style_sims[idx_int])
                     ),

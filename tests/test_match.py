@@ -189,3 +189,15 @@ def test_security_headers_and_input_validation():
         },
     )
     assert bad_weights.status_code == 422
+
+
+def test_readiness_probe_and_csls_hubness():
+    r_resp = client.get("/health/ready")
+    assert r_resp.status_code == 200
+    data = r_resp.json()
+    assert data["status"] == "ready"
+    assert data["celebrities_indexed"] >= 900
+    assert data["full_head_index_loaded"] is True
+    assert data["csls_hubness_mitigation"] is True
+    assert data["yunet_5pt_loaded"] is True
+    assert data["arcface_loaded"] is True

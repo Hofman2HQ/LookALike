@@ -21,6 +21,7 @@ from __future__ import annotations
 from functools import lru_cache
 import logging
 import math
+import os
 from pathlib import Path
 import threading
 import time
@@ -200,10 +201,23 @@ def _norm_vec(v: np.ndarray) -> np.ndarray:
     return v / n if n > 1e-8 else v
 
 
-def _extract_full_head_features(head_bgr: np.ndarray) -> Dict[str, Any]:
-    """Extract hair color, hair style/silhouette, and full-head vibe vectors + human-readable traits
-    from a 160x160 landmark-aligned full-head BGR crop.
+def _normalize_lighting(image: np.ndarray) -> np.ndarray:
+    """Apply gentle adaptive CLAHE on the LAB luminance channel only when an image
+    is under-exposed or low-contrast (common in dim party venues).
     """
+    lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+    l_chan = lab[:, :, 0]
+    l_mean = float(l_chan.mean())
+    l_std = float(l_chan.std())
+    if l_mean < 90.0 or l_std < 38.0:
+        clahe = cv2.createCLAHE(clipLimit=1.8, tileGridSize=(4, 4))
+        lab[:, :, 0] = clahe.apply(l_chan)
+        return cv2.cvtColor(lab, cv2.COLOR_LAB2BGR)
+    return image
+
+
+def _extract_full_head_single(head_bgr: np.ndarray) -> Dict[str, Any]:
+    """Extract raw directional full-head vectors and traits from a 160x160 aligned head crop."""
     if head_bgr.shape[:2] != (FULL_HEAD_SIZE, FULL_HEAD_SIZE):
         head_bgr = cv2.resize(
             head_bgr, (FULL_HEAD_SIZE, FULL_HEAD_SIZE), interpolation=cv2.INTER_AREA
@@ -448,6 +462,18 @@ def _extract_full_head_features(head_bgr: np.ndarray) -> Dict[str, Any]:
     }
 
 
+def _extract_full_head_features(head_bgr: np.ndarray) -> Dict[str, Any]:
+    """Extract mirror-invariant (flip-aggregated) hair color, hair style, and full-head vibe vectors."""
+    f1 = _extract_full_head_single(head_bgr)
+    f2 = _extract_full_head_single(cv2.flip(head_bgr, 1))
+    return {
+        "hair_color_vec": _norm_vec(f1["hair_color_vec"] + f2["hair_color_vec"]),
+        "hair_style_vec": _norm_vec(f1["hair_style_vec"] + f2["hair_style_vec"]),
+        "head_vibe_vec": _norm_vec(f1["head_vibe_vec"] + f2["head_vibe_vec"]),
+        "traits": f1["traits"],
+    }
+
+
 class FacePipeline:
     """Detect and 5-point align the most prominent face, returning its 512-D ArcFace embedding."""
 
@@ -503,8 +529,19 @@ class FacePipeline:
                 models_dir / "arcface_w600k_r50.onnx",
                 ARCFACE_URLS,
             )
+            sess_opts = ort.SessionOptions()
+            sess_opts.graph_optimization_level = (
+                ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+            )
+            sess_opts.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
+            sess_opts.intra_op_num_threads = min(
+                4, max(1, (os.cpu_count() or 2) // 2)
+            )
+            sess_opts.inter_op_num_threads = 1
             self._recognizer = ort.InferenceSession(
-                str(rec_path), providers=["CPUExecutionProvider"]
+                str(rec_path),
+                sess_options=sess_opts,
+                providers=["CPUExecutionProvider"],
             )
             self._rec_input = self._recognizer.get_inputs()[0].name
             log.info("ArcFace model loaded from %s", rec_path)
@@ -519,6 +556,14 @@ class FacePipeline:
                 _cellSize=(16, 16),
                 _nbins=9,
             )
+
+    def warmup(self) -> None:
+        """Pre-warm ONNX Runtime memory arenas so the first request has zero cold-start latency."""
+        try:
+            dummy = np.zeros((112, 112, 3), dtype=np.uint8)
+            self._embed_crops_batch([dummy])
+        except Exception:
+            pass
 
     # ------------------------------------------------------------------
     def _detect_yunet_raw(self, image: np.ndarray) -> Optional[np.ndarray]:
@@ -591,6 +636,9 @@ class FacePipeline:
         ih, iw = image.shape[:2]
         if ih < 16 or iw < 16:
             return None, meta
+
+        # Adaptive lighting normalization for dim/uneven party venues
+        image = _normalize_lighting(image)
 
         # 1. Try YuNet with 5-point landmark similarity alignment
         if self._yunet is not None:

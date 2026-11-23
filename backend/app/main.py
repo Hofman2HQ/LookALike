@@ -1,4 +1,5 @@
 from collections import OrderedDict, deque
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 import base64
 import hashlib
@@ -18,8 +19,9 @@ import uuid
 
 import cv2
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -27,7 +29,21 @@ from .models import MatchRequest, MatchResponse, Match, ComparisonDetails, Allow
 from .face import get_pipeline
 from .faiss_index import get_index, MODE_WEIGHTS
 
-app = FastAPI(title="LookAlike API")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Pre-warm ONNX models and FAISS + CSLS index on startup to eliminate first-request latency."""
+    try:
+        pipe = get_pipeline()
+        pipe.warmup()
+        get_index()
+    except Exception:
+        pass
+    yield
+
+
+app = FastAPI(title="LookAlike API", lifespan=lifespan)
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 FRONTEND_DIR = BASE_DIR / "frontend"
@@ -152,7 +168,8 @@ def _safe_decode_image(image_bytes: bytes) -> np.ndarray:
     if len(image_bytes) < 12:
         raise HTTPException(status_code=400, detail="Invalid image data")
 
-    # Verify image header dimensions lazily via PIL without decompressing the full raster
+    # Verify image header dimensions lazily via PIL without decompressing the full raster,
+    # then decode and apply EXIF orientation transpose if an orientation tag is present.
     try:
         with Image.open(io.BytesIO(image_bytes)) as pil_img:
             fmt = (pil_img.format or "").upper()
@@ -167,6 +184,11 @@ def _safe_decode_image(image_bytes: bytes) -> np.ndarray:
                     status_code=413,
                     detail=f"Image dimensions ({w}x{h}) exceed the {MAX_IMAGE_DIM}x{MAX_IMAGE_DIM} security limit.",
                 )
+            exif_orient = pil_img.getexif().get(0x0112, 1)
+            if exif_orient and exif_orient != 1:
+                transposed = ImageOps.exif_transpose(pil_img)
+                rgb = np.asarray(transposed.convert("RGB"), dtype=np.uint8)
+                return cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
     except HTTPException:
         raise
     except Exception as exc:
@@ -453,6 +475,21 @@ def index() -> HTMLResponse:
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok"}
+
+
+@app.get("/health/ready")
+def health_ready() -> dict:
+    idx = get_index()
+    pipe = get_pipeline()
+    ntotal = int(idx.index.ntotal) if getattr(idx, "index", None) is not None else 0
+    return {
+        "status": "ready" if ntotal > 0 else "degraded",
+        "celebrities_indexed": ntotal,
+        "full_head_index_loaded": idx.hair_color_vecs is not None,
+        "csls_hubness_mitigation": idx.csls_baseline is not None,
+        "yunet_5pt_loaded": getattr(pipe, "_yunet", None) is not None,
+        "arcface_loaded": not getattr(pipe, "_fallback", True),
+    }
 
 
 @app.get("/celebrities/sample")

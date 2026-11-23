@@ -183,8 +183,8 @@
     "name": "Aishwarya Rai",
     "photo_url": "/static/Aishwarya_Rai/Aishwarya_Rai_0004.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
-      "hair_style": "Short / Classic Cut",
+      "hair_color": "Dark Brown",
+      "hair_style": "Medium / Wavy",
       "facial_hair": "Clean / Smooth"
     }
   },
@@ -246,7 +246,7 @@
     "name": "Alex Rodriguez",
     "photo_url": "/static/Alex_Rodriguez/Alex_Rodriguez_0003.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Medium / Wavy",
       "facial_hair": "Clean / Smooth"
     }
@@ -311,7 +311,7 @@
     "traits": {
       "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
-      "facial_hair": "Stubble / Defined Jaw"
+      "facial_hair": "Clean / Smooth"
     }
   },
   "35": {
@@ -480,9 +480,9 @@
     "name": "Andy Garcia",
     "photo_url": "/static/Andy_Garcia/Andy_Garcia_0002.jpg",
     "traits": {
-      "hair_color": "Auburn / Dark Red",
-      "hair_style": "Long / Side-Framing",
-      "facial_hair": "Beard / Mustache"
+      "hair_color": "Dark Brown",
+      "hair_style": "Medium / Wavy",
+      "facial_hair": "Stubble / Defined Jaw"
     }
   },
   "54": {
@@ -507,7 +507,7 @@
     "name": "Angela Bassett",
     "photo_url": "/static/Angela_Bassett/Angela_Bassett_0004.jpg",
     "traits": {
-      "hair_color": "Dark Brown",
+      "hair_color": "Medium Brown",
       "hair_style": "Long / Side-Framing",
       "facial_hair": "Clean / Smooth"
     }
@@ -516,7 +516,7 @@
     "name": "Angelina Jolie",
     "photo_url": "/static/Angelina_Jolie/Angelina_Jolie_0001.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
       "facial_hair": "Beard / Mustache"
     }
@@ -535,7 +535,7 @@
     "photo_url": "/static/Anna_Faris/Anna_Faris_0001.jpg",
     "traits": {
       "hair_color": "Blonde / Golden",
-      "hair_style": "Medium / Wavy",
+      "hair_style": "Long / Side-Framing",
       "facial_hair": "Stubble / Defined Jaw"
     }
   },
@@ -607,7 +607,7 @@
     "photo_url": "/static/Anson_Mount/Anson_Mount_0003.jpg",
     "traits": {
       "hair_color": "Dark Brown",
-      "hair_style": "Medium / Wavy",
+      "hair_style": "Long / Side-Framing",
       "facial_hair": "Beard / Mustache"
     }
   },
@@ -634,8 +634,8 @@
     "photo_url": "/static/Anthony_Mackie/Anthony_Mackie_0003.jpg",
     "traits": {
       "hair_color": "Jet Black / Dark",
-      "hair_style": "Short / Classic Cut",
-      "facial_hair": "Beard / Mustache"
+      "hair_style": "Medium / Wavy",
+      "facial_hair": "Stubble / Defined Jaw"
     }
   },
   "71": {
@@ -787,7 +787,7 @@
     "photo_url": "/static/Benedict_Cumberbatch/Benedict_Cumberbatch_0004.jpg",
     "traits": {
       "hair_color": "Dark Brown",
-      "hair_style": "Medium / Wavy",
+      "hair_style": "Long / Side-Framing",
       "facial_hair": "Beard / Mustache"
     }
   },
@@ -797,7 +797,7 @@
     "traits": {
       "hair_color": "Jet Black / Dark",
       "hair_style": "Long / Side-Framing",
-      "facial_hair": "Clean / Smooth"
+      "facial_hair": "Stubble / Defined Jaw"
     }
   },
   "89": {
@@ -885,9 +885,9 @@
     "name": "Billy Porter",
     "photo_url": "/static/Billy_Porter/Billy_Porter_0001.jpg",
     "traits": {
-      "hair_color": "Dark Brown",
+      "hair_color": "Medium Brown",
       "hair_style": "Medium / Wavy",
-      "facial_hair": "Clean / Smooth"
+      "facial_hair": "Beard / Mustache"
     }
   },
   "99": {
@@ -1065,7 +1065,7 @@
     "name": "Carla Gugino",
     "photo_url": "/static/Carla_Gugino/Carla_Gugino_0001.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
       "facial_hair": "Clean / Smooth"
     }
@@ -1083,8 +1083,8 @@
     "name": "Casey Affleck",
     "photo_url": "/static/Casey_Affleck/Casey_Affleck_0001.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
-      "hair_style": "Short / Classic Cut",
+      "hair_color": "Dark Brown",
+      "hair_style": "Medium / Wavy",
       "facial_hair": "Beard / Mustache"
     }
   },
@@ -1121,7 +1121,7 @@
     "traits": {
       "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
-      "facial_hair": "Beard / Mustache"
+      "facial_hair": "Stubble / Defined Jaw"
     }
   },
   "125": {
@@ -1445,7 +1445,7 @@
     "traits": {
       "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
-      "facial_hair": "Stubble / Defined Jaw"
+      "facial_hair": "Beard / Mustache"
     }
   },
   "161": {
@@ -1497,9 +1497,9 @@
     "name": "Colin Firth",
     "photo_url": "/static/Colin_Firth/Colin_Firth_0003.jpg",
     "traits": {
-      "hair_color": "Auburn / Dark Red",
+      "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
-      "facial_hair": "Beard / Mustache"
+      "facial_hair": "Stubble / Defined Jaw"
     }
   },
   "167": {
@@ -1551,9 +1551,9 @@
     "name": "Courteney Cox",
     "photo_url": "/static/Courteney_Cox/Courteney_Cox_0004.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
-      "facial_hair": "Beard / Mustache"
+      "facial_hair": "Stubble / Defined Jaw"
     }
   },
   "173": {
@@ -1596,7 +1596,7 @@
     "name": "Dakota Johnson",
     "photo_url": "/static/Dakota_Johnson/Dakota_Johnson_0004.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Medium / Wavy",
       "facial_hair": "Beard / Mustache"
     }
@@ -1677,8 +1677,8 @@
     "name": "Daniel Kaluuya",
     "photo_url": "/static/Daniel_Kaluuya/Daniel_Kaluuya_0003.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
-      "hair_style": "Medium / Wavy",
+      "hair_color": "Dark Brown",
+      "hair_style": "Long / Side-Framing",
       "facial_hair": "Clean / Smooth"
     }
   },
@@ -1713,9 +1713,9 @@
     "name": "Darren Criss",
     "photo_url": "/static/Darren_Criss/Darren_Criss_0001.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Medium / Wavy",
-      "facial_hair": "Stubble / Defined Jaw"
+      "facial_hair": "Beard / Mustache"
     }
   },
   "191": {
@@ -1749,9 +1749,9 @@
     "name": "Daveed Diggs",
     "photo_url": "/static/Daveed_Diggs/Daveed_Diggs_0004.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Medium / Wavy",
-      "facial_hair": "Clean / Smooth"
+      "facial_hair": "Stubble / Defined Jaw"
     }
   },
   "195": {
@@ -1812,9 +1812,9 @@
     "name": "David Tennant",
     "photo_url": "/static/David_Tennant/David_Tennant_0003.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
-      "facial_hair": "Beard / Mustache"
+      "facial_hair": "Stubble / Defined Jaw"
     }
   },
   "202": {
@@ -1911,7 +1911,7 @@
     "name": "Diane Lane",
     "photo_url": "/static/Diane_Lane/Diane_Lane_0002.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Medium / Wavy",
       "facial_hair": "Beard / Mustache"
     }
@@ -2012,7 +2012,7 @@
     "traits": {
       "hair_color": "Medium Brown",
       "hair_style": "Medium / Wavy",
-      "facial_hair": "Beard / Mustache"
+      "facial_hair": "Stubble / Defined Jaw"
     }
   },
   "224": {
@@ -2047,7 +2047,7 @@
     "photo_url": "/static/Dwayne_The_Rock_Johnson/Dwayne_The_Rock_Johnson_0004.jpg",
     "traits": {
       "hair_color": "Red / Copper",
-      "hair_style": "Long / Side-Framing",
+      "hair_style": "Medium / Wavy",
       "facial_hair": "Beard / Mustache"
     }
   },
@@ -2291,7 +2291,7 @@
     "traits": {
       "hair_color": "Dark Brown",
       "hair_style": "Short / Classic Cut",
-      "facial_hair": "Stubble / Defined Jaw"
+      "facial_hair": "Clean / Smooth"
     }
   },
   "255": {
@@ -2343,7 +2343,7 @@
     "name": "Emily Hampshire",
     "photo_url": "/static/Emily_Hampshire/Emily_Hampshire_0002.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
       "facial_hair": "Beard / Mustache"
     }
@@ -2696,14 +2696,14 @@
     "traits": {
       "hair_color": "Dark Brown",
       "hair_style": "Medium / Wavy",
-      "facial_hair": "Beard / Mustache"
+      "facial_hair": "Stubble / Defined Jaw"
     }
   },
   "300": {
     "name": "Garrett Hedlund",
     "photo_url": "/static/Garrett_Hedlund/Garrett_Hedlund_0002.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Medium / Wavy",
       "facial_hair": "Clean / Smooth"
     }
@@ -2785,7 +2785,7 @@
     "photo_url": "/static/Giannis_Antetokounmpo/Giannis_Antetokounmpo_0003.jpg",
     "traits": {
       "hair_color": "Jet Black / Dark",
-      "hair_style": "Short / Classic Cut",
+      "hair_style": "Medium / Wavy",
       "facial_hair": "Clean / Smooth"
     }
   },
@@ -2993,7 +2993,7 @@
     "traits": {
       "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
-      "facial_hair": "Stubble / Defined Jaw"
+      "facial_hair": "Clean / Smooth"
     }
   },
   "333": {
@@ -3189,7 +3189,7 @@
     "name": "Idris Elba",
     "photo_url": "/static/Idris_Elba/Idris_Elba_0003.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
       "facial_hair": "Clean / Smooth"
     }
@@ -3253,7 +3253,7 @@
     "photo_url": "/static/Issa_Rae/Issa_Rae_0003.jpg",
     "traits": {
       "hair_color": "Dark Brown",
-      "hair_style": "Short / Classic Cut",
+      "hair_style": "Medium / Wavy",
       "facial_hair": "Clean / Smooth"
     }
   },
@@ -3387,9 +3387,9 @@
     "name": "James Marsden",
     "photo_url": "/static/James_Marsden/James_Marsden_0001.jpg",
     "traits": {
-      "hair_color": "Auburn / Dark Red",
+      "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
-      "facial_hair": "Clean / Smooth"
+      "facial_hair": "Beard / Mustache"
     }
   },
   "377": {
@@ -3442,7 +3442,7 @@
     "photo_url": "/static/Jamie_Foxx/Jamie_Foxx_0003.jpg",
     "traits": {
       "hair_color": "Jet Black / Dark",
-      "hair_style": "Medium / Wavy",
+      "hair_style": "Long / Side-Framing",
       "facial_hair": "Clean / Smooth"
     }
   },
@@ -3603,7 +3603,7 @@
     "name": "Jason Segel",
     "photo_url": "/static/Jason_Segel/Jason_Segel_0001.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Medium / Wavy",
       "facial_hair": "Beard / Mustache"
     }
@@ -3621,7 +3621,7 @@
     "name": "Jason Sudeikis",
     "photo_url": "/static/Jason_Sudeikis/Jason_Sudeikis_0004.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Medium / Wavy",
       "facial_hair": "Beard / Mustache"
     }
@@ -3657,9 +3657,9 @@
     "name": "Jeff Bezos",
     "photo_url": "/static/Jeff_Bezos/Jeff_Bezos_0001.jpg",
     "traits": {
-      "hair_color": "Blonde / Golden",
-      "hair_style": "Long / Side-Framing",
-      "facial_hair": "Stubble / Defined Jaw"
+      "hair_color": "Dark Brown",
+      "hair_style": "Medium / Wavy",
+      "facial_hair": "Clean / Smooth"
     }
   },
   "407": {
@@ -3765,9 +3765,9 @@
     "name": "Jennifer Connelly",
     "photo_url": "/static/Jennifer_Connelly/Jennifer_Connelly_0002.jpg",
     "traits": {
-      "hair_color": "Dark Brown",
+      "hair_color": "Jet Black / Dark",
       "hair_style": "Short / Classic Cut",
-      "facial_hair": "Stubble / Defined Jaw"
+      "facial_hair": "Clean / Smooth"
     }
   },
   "419": {
@@ -4010,7 +4010,7 @@
     "traits": {
       "hair_color": "Jet Black / Dark",
       "hair_style": "Long Waves / Curls",
-      "facial_hair": "Clean / Smooth"
+      "facial_hair": "Stubble / Defined Jaw"
     }
   },
   "446": {
@@ -4080,8 +4080,8 @@
     "name": "Joel Edgerton",
     "photo_url": "/static/Joel_Edgerton/Joel_Edgerton_0003.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
-      "hair_style": "Medium / Wavy",
+      "hair_color": "Dark Brown",
+      "hair_style": "Long / Side-Framing",
       "facial_hair": "Beard / Mustache"
     }
   },
@@ -4090,8 +4090,8 @@
     "photo_url": "/static/Joel_Kinnaman/Joel_Kinnaman_0003.jpg",
     "traits": {
       "hair_color": "Jet Black / Dark",
-      "hair_style": "Long / Side-Framing",
-      "facial_hair": "Beard / Mustache"
+      "hair_style": "Medium / Wavy",
+      "facial_hair": "Stubble / Defined Jaw"
     }
   },
   "455": {
@@ -4107,9 +4107,9 @@
     "name": "John Boyega",
     "photo_url": "/static/John_Boyega/John_Boyega_0001.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
-      "facial_hair": "Beard / Mustache"
+      "facial_hair": "Stubble / Defined Jaw"
     }
   },
   "457": {
@@ -4170,9 +4170,9 @@
     "name": "John Goodman",
     "photo_url": "/static/John_Goodman/John_Goodman_0002.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Medium / Wavy",
-      "facial_hair": "Clean / Smooth"
+      "facial_hair": "Stubble / Defined Jaw"
     }
   },
   "464": {
@@ -4359,9 +4359,9 @@
     "name": "Jonathan Pryce",
     "photo_url": "/static/Jonathan_Pryce/Jonathan_Pryce_0001.jpg",
     "traits": {
-      "hair_color": "Auburn / Dark Red",
-      "hair_style": "Medium / Wavy",
-      "facial_hair": "Stubble / Defined Jaw"
+      "hair_color": "Medium Brown",
+      "hair_style": "Long / Side-Framing",
+      "facial_hair": "Beard / Mustache"
     }
   },
   "485": {
@@ -4531,7 +4531,7 @@
     "photo_url": "/static/Julian_Casablancas/Julian_Casablancas_0002.jpg",
     "traits": {
       "hair_color": "Jet Black / Dark",
-      "hair_style": "Long Waves / Curls",
+      "hair_style": "Curly / High-Volume",
       "facial_hair": "Clean / Smooth"
     }
   },
@@ -4585,8 +4585,8 @@
     "photo_url": "/static/Juliette_Binoche/Juliette_Binoche_0004.jpg",
     "traits": {
       "hair_color": "Jet Black / Dark",
-      "hair_style": "Medium / Wavy",
-      "facial_hair": "Clean / Smooth"
+      "hair_style": "Long / Side-Framing",
+      "facial_hair": "Beard / Mustache"
     }
   },
   "510": {
@@ -4845,7 +4845,7 @@
     "name": "Katie Holmes",
     "photo_url": "/static/Katie_Holmes/Katie_Holmes_0002.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Medium / Wavy",
       "facial_hair": "Beard / Mustache"
     }
@@ -4855,7 +4855,7 @@
     "photo_url": "/static/Katie_McGrath/Katie_McGrath_0001.jpg",
     "traits": {
       "hair_color": "Dark Brown",
-      "hair_style": "Long / Side-Framing",
+      "hair_style": "Medium / Wavy",
       "facial_hair": "Beard / Mustache"
     }
   },
@@ -4935,8 +4935,8 @@
     "name": "Kelly Marie Tran",
     "photo_url": "/static/Kelly_Marie_Tran/Kelly_Marie_Tran_0004.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
-      "hair_style": "Medium / Wavy",
+      "hair_color": "Dark Brown",
+      "hair_style": "Long / Side-Framing",
       "facial_hair": "Clean / Smooth"
     }
   },
@@ -5007,7 +5007,7 @@
     "name": "Kevin Hart",
     "photo_url": "/static/Kevin_Hart/Kevin_Hart_0001.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
       "facial_hair": "Clean / Smooth"
     }
@@ -5070,9 +5070,9 @@
     "name": "Kim Kardashian",
     "photo_url": "/static/Kim_Kardashian/Kim_Kardashian_0004.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
-      "facial_hair": "Beard / Mustache"
+      "facial_hair": "Clean / Smooth"
     }
   },
   "564": {
@@ -5315,7 +5315,7 @@
     "traits": {
       "hair_color": "Dark Brown",
       "hair_style": "Medium / Wavy",
-      "facial_hair": "Beard / Mustache"
+      "facial_hair": "Stubble / Defined Jaw"
     }
   },
   "591": {
@@ -5412,7 +5412,7 @@
     "name": "Lily Aldridge",
     "photo_url": "/static/Lily_Aldridge/Lily_Aldridge_0004.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Medium / Wavy",
       "facial_hair": "Beard / Mustache"
     }
@@ -5493,7 +5493,7 @@
     "name": "Lisa Bonet",
     "photo_url": "/static/Lisa_Bonet/Lisa_Bonet_0001.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Medium / Wavy",
       "facial_hair": "Beard / Mustache"
     }
@@ -5513,7 +5513,7 @@
     "traits": {
       "hair_color": "Dark Brown",
       "hair_style": "Medium / Wavy",
-      "facial_hair": "Beard / Mustache"
+      "facial_hair": "Stubble / Defined Jaw"
     }
   },
   "613": {
@@ -5574,7 +5574,7 @@
     "name": "Lucy Liu",
     "photo_url": "/static/Lucy_Liu/Lucy_Liu_0002.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
       "facial_hair": "Beard / Mustache"
     }
@@ -5611,8 +5611,8 @@
     "photo_url": "/static/Lupita_Nyongo/Lupita_Nyongo_0002.jpg",
     "traits": {
       "hair_color": "Jet Black / Dark",
-      "hair_style": "Medium / Wavy",
-      "facial_hair": "Beard / Mustache"
+      "hair_style": "Long / Side-Framing",
+      "facial_hair": "Clean / Smooth"
     }
   },
   "624": {
@@ -5656,7 +5656,7 @@
     "photo_url": "/static/Maggie_Gyllenhaal/Maggie_Gyllenhaal_0004.jpg",
     "traits": {
       "hair_color": "Jet Black / Dark",
-      "hair_style": "Long / Side-Framing",
+      "hair_style": "Medium / Wavy",
       "facial_hair": "Beard / Mustache"
     }
   },
@@ -5674,8 +5674,8 @@
     "photo_url": "/static/Maggie_Siff/Maggie_Siff_0004.jpg",
     "traits": {
       "hair_color": "Jet Black / Dark",
-      "hair_style": "Medium / Wavy",
-      "facial_hair": "Clean / Smooth"
+      "hair_style": "Long / Side-Framing",
+      "facial_hair": "Stubble / Defined Jaw"
     }
   },
   "631": {
@@ -5808,7 +5808,7 @@
     "name": "Mark Hamill",
     "photo_url": "/static/Mark_Hamill/Mark_Hamill_0003.jpg",
     "traits": {
-      "hair_color": "Dark Brown",
+      "hair_color": "Ash Brown / Salt & Pepper",
       "hair_style": "Long / Side-Framing",
       "facial_hair": "Beard / Mustache"
     }
@@ -5944,8 +5944,8 @@
     "photo_url": "/static/Matt_Smith/Matt_Smith_0002.jpg",
     "traits": {
       "hair_color": "Dark Brown",
-      "hair_style": "Short / Classic Cut",
-      "facial_hair": "Beard / Mustache"
+      "hair_style": "Medium / Wavy",
+      "facial_hair": "Stubble / Defined Jaw"
     }
   },
   "661": {
@@ -5961,7 +5961,7 @@
     "name": "Matthew Goode",
     "photo_url": "/static/Matthew_Goode/Matthew_Goode_0004.jpg",
     "traits": {
-      "hair_color": "Medium Brown",
+      "hair_color": "Dark Brown",
       "hair_style": "Short / Classic Cut",
       "facial_hair": "Beard / Mustache"
     }
@@ -6015,7 +6015,7 @@
     "name": "Max Minghella",
     "photo_url": "/static/Max_Minghella/Max_Minghella_0004.jpg",
     "traits": {
-      "hair_color": "Dark Brown",
+      "hair_color": "Jet Black / Dark",
       "hair_style": "Medium / Wavy",
       "facial_hair": "Beard / Mustache"
     }
@@ -6051,7 +6051,7 @@
     "name": "Megan Fox",
     "photo_url": "/static/Megan_Fox/Megan_Fox_0002.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
       "facial_hair": "Beard / Mustache"
     }
@@ -6069,8 +6069,8 @@
     "name": "Meghan Markle",
     "photo_url": "/static/Meghan_Markle/Meghan_Markle_0003.jpg",
     "traits": {
-      "hair_color": "Dark Brown",
-      "hair_style": "Long / Side-Framing",
+      "hair_color": "Medium Brown",
+      "hair_style": "Medium / Wavy",
       "facial_hair": "Stubble / Defined Jaw"
     }
   },
@@ -6097,8 +6097,8 @@
     "photo_url": "/static/Melanie_Lynskey/Melanie_Lynskey_0001.jpg",
     "traits": {
       "hair_color": "Jet Black / Dark",
-      "hair_style": "Short / Classic Cut",
-      "facial_hair": "Clean / Smooth"
+      "hair_style": "Medium / Wavy",
+      "facial_hair": "Stubble / Defined Jaw"
     }
   },
   "678": {
@@ -6168,9 +6168,9 @@
     "name": "Michael Caine",
     "photo_url": "/static/Michael_Caine/Michael_Caine_0003.jpg",
     "traits": {
-      "hair_color": "Red / Copper",
+      "hair_color": "Dark Brown",
       "hair_style": "Medium / Wavy",
-      "facial_hair": "Stubble / Defined Jaw"
+      "facial_hair": "Clean / Smooth"
     }
   },
   "686": {
@@ -6206,7 +6206,7 @@
     "traits": {
       "hair_color": "Jet Black / Dark",
       "hair_style": "Medium / Wavy",
-      "facial_hair": "Beard / Mustache"
+      "facial_hair": "Stubble / Defined Jaw"
     }
   },
   "690": {
@@ -6249,7 +6249,7 @@
     "name": "Michael Phelps",
     "photo_url": "/static/Michael_Phelps/Michael_Phelps_0002.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
       "facial_hair": "Beard / Mustache"
     }
@@ -6303,7 +6303,7 @@
     "name": "Michelle Obama",
     "photo_url": "/static/Michelle_Obama/Michelle_Obama_0004.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Medium / Wavy",
       "facial_hair": "Clean / Smooth"
     }
@@ -6555,7 +6555,7 @@
     "name": "Nathalie Portman",
     "photo_url": "/static/Nathalie_Portman/Nathalie_Portman_0004.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
       "facial_hair": "Beard / Mustache"
     }
@@ -6583,7 +6583,7 @@
     "photo_url": "/static/Neil_deGrasse_Tyson/Neil_deGrasse_Tyson_0001.jpg",
     "traits": {
       "hair_color": "Dark Brown",
-      "hair_style": "Long / Side-Framing",
+      "hair_style": "Medium / Wavy",
       "facial_hair": "Clean / Smooth"
     }
   },
@@ -6611,7 +6611,7 @@
     "traits": {
       "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
-      "facial_hair": "Clean / Smooth"
+      "facial_hair": "Stubble / Defined Jaw"
     }
   },
   "735": {
@@ -6719,7 +6719,7 @@
     "traits": {
       "hair_color": "Jet Black / Dark",
       "hair_style": "Long / Side-Framing",
-      "facial_hair": "Stubble / Defined Jaw"
+      "facial_hair": "Clean / Smooth"
     }
   },
   "747": {
@@ -6736,7 +6736,7 @@
     "photo_url": "/static/Octavia_Spencer/Octavia_Spencer_0001.jpg",
     "traits": {
       "hair_color": "Dark Brown",
-      "hair_style": "Medium / Wavy",
+      "hair_style": "Long / Side-Framing",
       "facial_hair": "Clean / Smooth"
     }
   },
@@ -6807,7 +6807,7 @@
     "name": "Oprah Winfrey",
     "photo_url": "/static/Oprah_Winfrey/Oprah_Winfrey_0002.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Medium / Wavy",
       "facial_hair": "Clean / Smooth"
     }
@@ -6817,7 +6817,7 @@
     "photo_url": "/static/Orlando_Bloom/Orlando_Bloom_0004.jpg",
     "traits": {
       "hair_color": "Jet Black / Dark",
-      "hair_style": "Short / Classic Cut",
+      "hair_style": "Medium / Wavy",
       "facial_hair": "Beard / Mustache"
     }
   },
@@ -6845,7 +6845,7 @@
     "traits": {
       "hair_color": "Ash Brown / Salt & Pepper",
       "hair_style": "Long / Side-Framing",
-      "facial_hair": "Stubble / Defined Jaw"
+      "facial_hair": "Clean / Smooth"
     }
   },
   "761": {
@@ -6853,7 +6853,7 @@
     "photo_url": "/static/Patrick_Dempsey/Patrick_Dempsey_0003.jpg",
     "traits": {
       "hair_color": "Medium Brown",
-      "hair_style": "Short / Classic Cut",
+      "hair_style": "Medium / Wavy",
       "facial_hair": "Beard / Mustache"
     }
   },
@@ -6861,7 +6861,7 @@
     "name": "Patrick Mahomes",
     "photo_url": "/static/Patrick_Mahomes/Patrick_Mahomes_0001.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Medium / Wavy",
       "facial_hair": "Stubble / Defined Jaw"
     }
@@ -6978,7 +6978,7 @@
     "name": "Pete Davidson",
     "photo_url": "/static/Pete_Davidson/Pete_Davidson_0001.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
       "facial_hair": "Beard / Mustache"
     }
@@ -7185,7 +7185,7 @@
     "name": "Regina King",
     "photo_url": "/static/Regina_King/Regina_King_0002.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
       "facial_hair": "Beard / Mustache"
     }
@@ -7330,7 +7330,7 @@
     "photo_url": "/static/Robert_Carlyle/Robert_Carlyle_0003.jpg",
     "traits": {
       "hair_color": "Jet Black / Dark",
-      "hair_style": "Long / Side-Framing",
+      "hair_style": "Medium / Wavy",
       "facial_hair": "Clean / Smooth"
     }
   },
@@ -7509,7 +7509,7 @@
     "name": "Ruth Wilson",
     "photo_url": "/static/Ruth_Wilson/Ruth_Wilson_0004.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Medium / Wavy",
       "facial_hair": "Beard / Mustache"
     }
@@ -7537,8 +7537,8 @@
     "photo_url": "/static/Ryan_Murphy/Ryan_Murphy_0004.jpg",
     "traits": {
       "hair_color": "Strawberry Blonde",
-      "hair_style": "Long / Side-Framing",
-      "facial_hair": "Beard / Mustache"
+      "hair_style": "Short / Classic Cut",
+      "facial_hair": "Clean / Smooth"
     }
   },
   "838": {
@@ -7572,9 +7572,9 @@
     "name": "Salma Hayek",
     "photo_url": "/static/Salma_Hayek/Salma_Hayek_0004.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
-      "facial_hair": "Stubble / Defined Jaw"
+      "facial_hair": "Clean / Smooth"
     }
   },
   "842": {
@@ -7644,9 +7644,9 @@
     "name": "Sandra Oh",
     "photo_url": "/static/Sandra_Oh/Sandra_Oh_0002.jpg",
     "traits": {
-      "hair_color": "Dark Brown",
-      "hair_style": "Short / Classic Cut",
-      "facial_hair": "Beard / Mustache"
+      "hair_color": "Jet Black / Dark",
+      "hair_style": "Medium / Wavy",
+      "facial_hair": "Stubble / Defined Jaw"
     }
   },
   "850": {
@@ -7888,7 +7888,7 @@
     "photo_url": "/static/Shohreh_Aghdashloo/Shohreh_Aghdashloo_0004.jpg",
     "traits": {
       "hair_color": "Jet Black / Dark",
-      "hair_style": "Medium / Wavy",
+      "hair_style": "Long / Side-Framing",
       "facial_hair": "Beard / Mustache"
     }
   },
@@ -8085,8 +8085,8 @@
     "name": "Taika Waititi",
     "photo_url": "/static/Taika_Waititi/Taika_Waititi_0003.jpg",
     "traits": {
-      "hair_color": "Ash Brown / Salt & Pepper",
-      "hair_style": "Medium / Wavy",
+      "hair_color": "Medium Brown",
+      "hair_style": "Long / Side-Framing",
       "facial_hair": "Beard / Mustache"
     }
   },
@@ -8121,7 +8121,7 @@
     "name": "Taylor Kitsch",
     "photo_url": "/static/Taylor_Kitsch/Taylor_Kitsch_0002.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
       "facial_hair": "Beard / Mustache"
     }
@@ -8150,7 +8150,7 @@
     "traits": {
       "hair_color": "Dark Brown",
       "hair_style": "Medium / Wavy",
-      "facial_hair": "Stubble / Defined Jaw"
+      "facial_hair": "Beard / Mustache"
     }
   },
   "906": {
@@ -8229,7 +8229,7 @@
     "name": "Tiger Woods",
     "photo_url": "/static/Tiger_Woods/Tiger_Woods_0003.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
       "facial_hair": "Clean / Smooth"
     }
@@ -8247,7 +8247,7 @@
     "name": "Tim Burton",
     "photo_url": "/static/Tim_Burton/Tim_Burton_0003.jpg",
     "traits": {
-      "hair_color": "Dark Brown",
+      "hair_color": "Medium Brown",
       "hair_style": "Medium / Wavy",
       "facial_hair": "Stubble / Defined Jaw"
     }
@@ -8328,7 +8328,7 @@
     "name": "Toby Regbo",
     "photo_url": "/static/Toby_Regbo/Toby_Regbo_0002.jpg",
     "traits": {
-      "hair_color": "Auburn / Dark Red",
+      "hair_color": "Dark Brown",
       "hair_style": "Medium / Wavy",
       "facial_hair": "Beard / Mustache"
     }
@@ -8392,7 +8392,7 @@
     "photo_url": "/static/Tom_Hanks/Tom_Hanks_0003.jpg",
     "traits": {
       "hair_color": "Medium Brown",
-      "hair_style": "Long / Side-Framing",
+      "hair_style": "Medium / Wavy",
       "facial_hair": "Clean / Smooth"
     }
   },
@@ -8400,7 +8400,7 @@
     "name": "Tom Hardy",
     "photo_url": "/static/Tom_Hardy/Tom_Hardy_0001.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Medium / Wavy",
       "facial_hair": "Beard / Mustache"
     }
@@ -8411,7 +8411,7 @@
     "traits": {
       "hair_color": "Dark Brown",
       "hair_style": "Medium / Wavy",
-      "facial_hair": "Stubble / Defined Jaw"
+      "facial_hair": "Clean / Smooth"
     }
   },
   "935": {
@@ -8518,8 +8518,8 @@
     "photo_url": "/static/Usain_Bolt/Usain_Bolt_0003.jpg",
     "traits": {
       "hair_color": "Dark Brown",
-      "hair_style": "Short / Classic Cut",
-      "facial_hair": "Stubble / Defined Jaw"
+      "hair_style": "Long / Side-Framing",
+      "facial_hair": "Clean / Smooth"
     }
   },
   "947": {
@@ -8582,7 +8582,7 @@
     "traits": {
       "hair_color": "Red / Copper",
       "hair_style": "Long / Side-Framing",
-      "facial_hair": "Beard / Mustache"
+      "facial_hair": "Stubble / Defined Jaw"
     }
   },
   "954": {
@@ -8591,16 +8591,16 @@
     "traits": {
       "hair_color": "Medium Brown",
       "hair_style": "Long / Side-Framing",
-      "facial_hair": "Beard / Mustache"
+      "facial_hair": "Clean / Smooth"
     }
   },
   "955": {
     "name": "Vincent Cassel",
     "photo_url": "/static/Vincent_Cassel/Vincent_Cassel_0003.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
-      "facial_hair": "Stubble / Defined Jaw"
+      "facial_hair": "Beard / Mustache"
     }
   },
   "956": {
@@ -8717,7 +8717,7 @@
     "traits": {
       "hair_color": "Jet Black / Dark",
       "hair_style": "Long / Side-Framing",
-      "facial_hair": "Beard / Mustache"
+      "facial_hair": "Clean / Smooth"
     }
   },
   "969": {
@@ -8733,7 +8733,7 @@
     "name": "Yara Shahidi",
     "photo_url": "/static/Yara_Shahidi/Yara_Shahidi_0003.jpg",
     "traits": {
-      "hair_color": "Auburn / Dark Red",
+      "hair_color": "Dark Brown",
       "hair_style": "Medium / Wavy",
       "facial_hair": "Beard / Mustache"
     }
@@ -8787,7 +8787,7 @@
     "name": "Zachary Quinto",
     "photo_url": "/static/Zachary_Quinto/Zachary_Quinto_0003.jpg",
     "traits": {
-      "hair_color": "Jet Black / Dark",
+      "hair_color": "Dark Brown",
       "hair_style": "Long / Side-Framing",
       "facial_hair": "Beard / Mustache"
     }

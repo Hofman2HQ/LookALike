@@ -816,7 +816,16 @@ function showMatches(matches, bestGuess = false, details = null, userImgDataUrl 
         playRouletteReveal({ matches, best_guess: bestGuess, details }, userImgDataUrl);
     });
 
+    const shareBtn = document.createElement('button');
+    shareBtn.type = 'button';
+    shareBtn.className = 'details-toggle-btn';
+    shareBtn.innerHTML = '&#x1F4E4;&nbsp; Save Twin Card';
+    shareBtn.addEventListener('click', () => {
+        exportTwinCard(userImgDataUrl, matches[index], index, details);
+    });
+
     toggleWrap.appendChild(detailsBtn);
+    toggleWrap.appendChild(shareBtn);
     toggleWrap.appendChild(replayBtn);
     results.appendChild(toggleWrap);
 
@@ -1030,12 +1039,16 @@ phonBtn.addEventListener('click', async () => {
     sub.textContent = 'Snap a selfie on your phone and watch the live full-head & biometric scan happen right here on the big screen!';
 
     const qrDiv = document.createElement('div');
-    new QRCode(qrDiv, {
-        text: mobile_url,
-        width: 180,
-        height: 180,
-        correctLevel: QRCode.CorrectLevel.M,
-    });
+    if (typeof QRCode !== 'undefined') {
+        new QRCode(qrDiv, {
+            text: mobile_url,
+            width: 180,
+            height: 180,
+            correctLevel: QRCode.CorrectLevel.M,
+        });
+    } else {
+        qrDiv.textContent = 'Open the link below on your phone:';
+    }
 
     const urlNote = document.createElement('div');
     urlNote.className = 'qr-url';
@@ -1084,3 +1097,218 @@ phonBtn.addEventListener('click', async () => {
         } catch (_) { /* keep polling on transient errors */ }
     }, 1500);
 });
+
+// ── Live Webcam Party Photo Booth ─────────────────────────────────────────
+
+const webcamBtn = document.getElementById('webcam-btn');
+const webcamModal = document.getElementById('webcam-modal');
+const webcamVideo = document.getElementById('webcam-video');
+const webcamCountdown = document.getElementById('webcam-countdown');
+const webcamSnapTimerBtn = document.getElementById('webcam-snap-timer-btn');
+const webcamSnapNowBtn = document.getElementById('webcam-snap-now-btn');
+const webcamCloseBtn = document.getElementById('webcam-close-btn');
+
+let _webcamStream = null;
+let _countdownTimer = null;
+
+function closeWebcamModal() {
+    if (_countdownTimer) { clearInterval(_countdownTimer); _countdownTimer = null; }
+    if (webcamCountdown) webcamCountdown.style.display = 'none';
+    if (_webcamStream) {
+        _webcamStream.getTracks().forEach(t => t.stop());
+        _webcamStream = null;
+    }
+    if (webcamVideo) webcamVideo.srcObject = null;
+    if (webcamModal) webcamModal.classList.remove('open');
+}
+
+function captureWebcamFrame() {
+    if (!webcamVideo || !webcamVideo.videoWidth) return;
+    const vw = webcamVideo.videoWidth;
+    const vh = webcamVideo.videoHeight;
+    const side = Math.min(vw, vh, 960);
+    const sx = Math.max(0, (vw - Math.min(vw, vh)) / 2);
+    const sy = Math.max(0, (vh - Math.min(vw, vh)) / 2);
+    const sSide = Math.min(vw, vh);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = side;
+    canvas.height = side;
+    const ctx = canvas.getContext('2d');
+    // Mirror horizontally to match the preview
+    ctx.translate(side, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(webcamVideo, sx, sy, sSide, sSide, 0, 0, side, side);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+    closeWebcamModal();
+    executeMatch(dataUrl, true);
+}
+
+if (webcamBtn) {
+    webcamBtn.addEventListener('click', async () => {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            showStatus('Live camera is not available in this browser. Use Upload Photo or Party QR.', true);
+            return;
+        }
+        try {
+            _webcamStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'user', width: { ideal: 960 }, height: { ideal: 960 } },
+                audio: false,
+            });
+            webcamVideo.srcObject = _webcamStream;
+            webcamModal.classList.add('open');
+        } catch (err) {
+            showStatus('Camera permission denied or unavailable: ' + err.message, true);
+        }
+    });
+}
+
+if (webcamCloseBtn) {
+    webcamCloseBtn.addEventListener('click', closeWebcamModal);
+}
+if (webcamSnapNowBtn) {
+    webcamSnapNowBtn.addEventListener('click', captureWebcamFrame);
+}
+if (webcamSnapTimerBtn) {
+    webcamSnapTimerBtn.addEventListener('click', () => {
+        if (_countdownTimer) return;
+        let count = 3;
+        webcamCountdown.textContent = String(count);
+        webcamCountdown.style.display = 'flex';
+        _countdownTimer = setInterval(() => {
+            count--;
+            if (count > 0) {
+                webcamCountdown.textContent = String(count);
+            } else {
+                clearInterval(_countdownTimer);
+                _countdownTimer = null;
+                webcamCountdown.style.display = 'none';
+                captureWebcamFrame();
+            }
+        }, 850);
+    });
+}
+
+// ── Downloadable Side-by-Side "Party Twin Card" Generator ─────────────────
+
+function loadImgForCanvas(src) {
+    return new Promise((resolve) => {
+        if (!src) { resolve(null); return; }
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = src;
+    });
+}
+
+async function exportTwinCard(userImgUrl, celebMatch, rankIdx, details) {
+    if (!celebMatch) return;
+    const [uImg, cImg] = await Promise.all([
+        loadImgForCanvas(userImgUrl),
+        loadImgForCanvas(celebMatch.photo_url),
+    ]);
+
+    const W = 960;
+    const H = 600;
+    const canvas = document.createElement('canvas');
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    // Background gradient
+    const bgGrad = ctx.createLinearGradient(0, 0, W, H);
+    bgGrad.addColorStop(0, '#0c0c16');
+    bgGrad.addColorStop(0.5, '#17132b');
+    bgGrad.addColorStop(1, '#100c1c');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    // Header title
+    ctx.fillStyle = '#c084fc';
+    ctx.font = 'bold 16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('✨ LOOKALIKE • PARTY EDITION • BIOMETRIC & FULL-HEAD AI', W / 2, 46);
+
+    const pct = calibrateMatchPct(celebMatch.score);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '800 32px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    ctx.fillText(`#${rankIdx + 1} Celebrity Twin: ${celebMatch.name} (${pct}% Match)`, W / 2, 88);
+
+    // Helper for rounded image frame
+    function drawFramedPhoto(img, x, y, size, labelText, subText, accentColor) {
+        ctx.save();
+        ctx.fillStyle = '#181826';
+        ctx.strokeStyle = accentColor;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.roundRect(x, y, size, size, 22);
+        ctx.fill();
+        ctx.stroke();
+
+        if (img) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.roundRect(x + 2, y + 2, size - 4, size - 4, 20);
+            ctx.clip();
+            const iw = img.naturalWidth || img.width;
+            const ih = img.naturalHeight || img.height;
+            const s = Math.min(iw, ih);
+            ctx.drawImage(img, (iw - s) / 2, (ih - s) / 2, s, s, x, y, size, size);
+            ctx.restore();
+        }
+        ctx.restore();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 21px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(labelText, x + size / 2, y + size + 34);
+
+        ctx.fillStyle = '#9d9dc2';
+        ctx.font = '600 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        ctx.fillText(subText, x + size / 2, y + size + 58);
+    }
+
+    const uTraits = (details && details.subject_traits)
+        ? `${details.subject_traits.hair_color} • ${details.subject_traits.hair_style}`
+        : '5-Point Biometric Profile';
+    const cTraits = celebMatch.traits
+        ? `${celebMatch.traits.hair_color} • ${celebMatch.traits.hair_style}`
+        : `${pct}% Overall Resemblance`;
+
+    drawFramedPhoto(uImg, 95, 125, 310, 'YOU', uTraits, '#22d3ee');
+    drawFramedPhoto(cImg, 555, 125, 310, celebMatch.name, cTraits, '#c084fc');
+
+    // Center VS badge
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(W / 2, 280, 42, 0, Math.PI * 2);
+    ctx.fillStyle = '#7c6aff';
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '900 22px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${pct}%`, W / 2, 287);
+    ctx.restore();
+
+    // Footer sub-scores bar
+    const facePct = celebMatch.face_score != null ? calibrateMatchPct(celebMatch.face_score) : pct;
+    const stylePct = celebMatch.hair_style_score != null ? Math.round(celebMatch.hair_style_score) : pct;
+    const colorPct = celebMatch.hair_color_score != null ? Math.round(celebMatch.hair_color_score) : pct;
+    const vibePct = celebMatch.head_vibe_score != null ? Math.round(celebMatch.head_vibe_score) : pct;
+
+    ctx.fillStyle = '#8585ad';
+    ctx.font = '600 15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(
+        `Face Structure: ${facePct}%   |   Hair Style: ${stylePct}%   |   Hair Color: ${colorPct}%   |   Head Vibe: ${vibePct}%`,
+        W / 2,
+        558
+    );
+
+    const slug = celebMatch.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const a = document.createElement('a');
+    a.download = `lookalike-twin-${slug}.png`;
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+}
